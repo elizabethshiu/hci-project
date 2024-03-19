@@ -17,4 +17,6 @@ npm run dev
 
 Using antd:
 - Make sure to add the component in the import statement at the top of the file
-- copy paste any data structures near the top and the <Element> </Element> into the body
+- Copy paste any data structures near the top and the <Element> </Element> into the body
+- After adding a new element save the file and refresh the page
+- If the page is blank double check that you imported the component
