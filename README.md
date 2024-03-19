@@ -9,9 +9,11 @@ Currently, two official plugins are available:
 
 
 To run app:
-`cd hci-project`
-`npm install`
-`npm run dev`
+```
+cd hci-project
+npm install
+npm run dev
+```
 
 Using antd:
 - Make sure to add the component in the import statement at the top of the file
