@@ -1,10 +1,15 @@
-import React from 'react';
-import { DeleteOutlined } from '@ant-design/icons';
-import { Tabs, Layout, Menu, theme, Table } from 'antd';
-import './app.css';
 
+// import { ReactComponent as BookIcon } from './img/book.svg';
+// import { ReactComponent as JournalIcon } from './img/journal.svg';
+// import { ReactComponent as WebPageIcon } from './img/website.svg';
+import React, { useState, useEffect } from 'react';
+import { DeleteOutlined } from '@ant-design/icons';
+import { Tabs, Layout, Menu, theme, Table, Card } from 'antd';
+import './app.css'; // Import CSS file
 
 const { Header, Content, Sider } = Layout;
+
+
 
 const navBarItems = [
   {
@@ -47,34 +52,70 @@ const rightSidebarItems = [
   {
     key: 'info',
     label: 'Info',
-    children: 'Insert info form',
+    render: (sourceData) => <div>{sourceData.description}</div>,
   },
   {
     key: 'notes',
     label: 'Notes',
-    children: 'Content of Tab Pane 2',
+    render: (selectedSource) => {
+      return selectedSource ? (
+        <Card title="Notes">
+          {selectedSource.notes.map((note, index) => (
+            <Card key={index} style={{ marginBottom: 16 }}>
+              <p>{note}</p>
+            </Card>
+          ))}
+        </Card>
+      ) : (
+        <div></div> // Blank tab pane if no source is selected
+      );
+    }
   },
   {
     key: 'tags',
     label: 'Tags',
-    children: 'Content of Tab Pane 3',
+    render: () => <div>Content of Tab Pane 3</div>,
   },
   {
     key: 'related',
     label: 'Related',
-    children: 'Content of Tab Pane 4',
+    render: () => <div>Content of Tab Pane 4</div>,
   },
 ];
 
-const articleColumns = [
+const sourceColumns = [
+  // {
+  //   title: 'ICON', // Empty title for the icon column
+  //   dataIndex: 'itemType',
+  //   render: (itemType) => {
+  //     switch (itemType) {
+  //       case 'Book':
+  //         return <BookIcon />;
+  //       case 'Journal Article':
+  //         return <JournalIcon />;
+  //       case 'Web Page':
+  //         return <WebPageIcon />;
+  //       default:
+  //         return null;
+  //     }
+  //   }
+  // },
   {
     title: 'Title',
     dataIndex: 'title',
   },
   {
-    title: 'Author',
-    dataIndex: 'author',
+    title: 'Authors',
+    dataIndex: 'authors',
+    render: (authors, record) => {
+      if (!authors || authors.length === 0) {
+        return 'N/A';
+      }
+      const condensedAuthors = record.condensedAuthors || authors.map(author => `${author.firstName} ${author.lastName}`).join(', ');
+      return condensedAuthors;
+    }
   },
+
   {
     title: 'Action',
     dataIndex: '',
@@ -83,35 +124,85 @@ const articleColumns = [
   },
 ];
 
-const articleData = [
+const sourceData = [
   {
     key: 1,
-    title: 'Fake Article 1',
-    author: 'John',
+    title: 'I.—COMPUTING MACHINERY AND INTELLIGENCE',
+    authors: [{ firstName: 'Alan', lastName: 'Turing' }],
+    condensedAuthors: 'Turing',
     description: 'PDF here (?)',
+    notes: ['Note 1 for I.—COMPUTING MACHINERY AND INTELLIGENCE', 'Note 2 for I.—COMPUTING MACHINERY AND INTELLIGENCE'],
+    itemType: 'Journal Article'
   },
   {
     key: 2,
-    title: 'Fake Article 1',
-    author: 'John',
+    title: 'Artificial Intelligence: A Modern Approach',
+    authors: [{ firstName: 'Peter', lastName: 'Stuart' }, { firstName: 'Peter', lastName: 'Norvig' }],
+    condensedAuthors: 'Stuart & Norvig',
     description: 'PDF here (?)',
+    notes: ['Note 1 for Artificial Intelligence: A Modern Approach', 'Note 2 for Artificial Intelligence: A Modern Approach'],
+    itemType: 'Book'
   },
   {
     key: 3,
-    title: 'Not Expandable',
-    author: 'John',
+    title: 'Foundations of Machine Learning',
+    authors: [{ firstName: 'Mehryar', lastName: 'Mohri' }, { firstName: 'Afshin', lastName: 'Rostamizadeh' }, { firstName: 'Ameet', lastName: 'Talwalkar' }],
+    condensedAuthors: 'Mohri et al.',
+    description: 'PDF here (?)',
+    notes: ['Note 1 for Foundations of Machine Learning'],
+    itemType: 'Book'
+  },
+  {
+    key: 4,
+    title: 'A New High In Deal Activity To Artificial Intelligence Startups In Q4\'15',
+    authors: [],
+    condensedAuthors: 'N/A',
     description: 'N/A',
+    notes: ['Note 1 for A New High In Deal Activity To Artificial Intelligence Startups In Q4\'15'],
+    itemType: 'Web Page'
+  },
+  {
+    key: 5,
+    title: 'ImageNet Classification with Deep Convolutional Neural Networks',
+    authors: [{ firstName: 'Alex', lastName: 'Krizhevsky' }, { firstName: 'Ilya', lastName: 'Sutskever' }, { firstName: 'Geoffrey', lastName: 'Hinton' }],
+    condensedAuthors: 'Krizhevsky et al.',
+    description: 'PDF here (?)',
+    notes: ['Note 1 for ImageNet Classification with Deep Convolutional Neural Networks'],
+    itemType: 'Journal Article'
   }
-]
+];
 
-const onRightSidebarChange = (key) => {
-  console.log(key);
-} 
 
 const App = () => {
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
+  
+  const [selectedSource, setSelectedSource] = useState(null);
+
+  const onSourceRowClick = (record) => {
+    setSelectedSource(record);
+  };
+
+  const onRightSidebarChange = (key) => {
+    console.log(key);
+  }; 
+
+  useEffect(() => {
+    const handleOutsideClick = (event) => {
+      const isClickInsideTable = event.target.closest('.ant-table');
+      if (!isClickInsideTable) {
+        setSelectedSource(null); // Reset selected source when clicking outside the table
+      }
+    };
+
+    document.addEventListener('click', handleOutsideClick);
+
+    return () => {
+      document.removeEventListener('click', handleOutsideClick);
+    };
+  }, []);
+
   return (
     <Layout>
       <Header
@@ -149,7 +240,6 @@ const App = () => {
             }}
             items={leftSidebarItems}
           />
-          
         </Sider>
         <Layout
           style={{
@@ -166,7 +256,7 @@ const App = () => {
             }}
           >
             <Table
-              columns={articleColumns}
+              columns={sourceColumns}
               expandable={{
                 expandedRowRender: (record) => (
                   <p
@@ -179,8 +269,13 @@ const App = () => {
                 ),
                 rowExpandable: (record) => record.title !== 'Not Expandable',
               }}
-              dataSource={articleData}
+              dataSource={sourceData}
               pagination={false}
+              onRow={(record, rowIndex) => ({
+                onClick: () => {
+                  onSourceRowClick(record);
+                }
+              })}
             />
           </Content>
         </Layout>
@@ -190,15 +285,31 @@ const App = () => {
             background: colorBgContainer,
             paddingLeft: 12
           }}
-          >
-            <Tabs defaultActiveKey="1" items={rightSidebarItems} onChange={onRightSidebarChange} />
-            
+        >
+          {!selectedSource && (
+            <Card title="Notes">
+              {sourceData.map(source => (
+                <div key={source.key}>
+                  <h3>{source.title}</h3>
+                  {source.notes.map((note, index) => (
+                    <Card key={index} style={{ marginBottom: 16 }}>
+                      <p>{note}</p>
+                    </Card>
+                  ))}
+                </div>
+              ))}
+            </Card>
+          )}
+          {selectedSource && (
+            <Tabs defaultActiveKey="1" items={rightSidebarItems.map(item => ({
+              ...item,
+              children: item.render(selectedSource)
+            }))} onChange={onRightSidebarChange} />
+          )}
         </Sider>
       </Layout>
     </Layout>
-
-
-
   );
 };
+
 export default App;
