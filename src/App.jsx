@@ -1,11 +1,10 @@
-
-// import { ReactComponent as BookIcon } from './img/book.svg';
-// import { ReactComponent as JournalIcon } from './img/journal.svg';
-// import { ReactComponent as WebPageIcon } from './img/website.svg';
 import React, { useState, useEffect } from 'react';
 import { DeleteOutlined } from '@ant-design/icons';
-import { Tabs, Layout, Menu, theme, Table, Card } from 'antd';
+import { Tabs, Layout, Menu, theme, Table, Card, Flex, Tag} from 'antd';
 import './app.css'; // Import CSS file
+import {
+  SnippetsTwoTone
+} from '@ant-design/icons';
 
 const { Header, Content, Sider } = Layout;
 
@@ -84,22 +83,50 @@ const rightSidebarItems = [
 ];
 
 const sourceColumns = [
-  // {
-  //   title: 'ICON', // Empty title for the icon column
-  //   dataIndex: 'itemType',
-  //   render: (itemType) => {
-  //     switch (itemType) {
-  //       case 'Book':
-  //         return <BookIcon />;
-  //       case 'Journal Article':
-  //         return <JournalIcon />;
-  //       case 'Web Page':
-  //         return <WebPageIcon />;
-  //       default:
-  //         return null;
-  //     }
-  //   }
-  // },
+  {
+    title: '',
+    dataIndex: 'notes',
+    render: (notes) => {
+      if (!notes || notes.length === 0) {
+        return null; // If no notes, don't render anything
+      }
+      const concatenatedNotes = notes.join(', '); // Concatenate all notes into one string
+      return (
+        <span>
+          <Tag
+            style={{
+              background: 'transparent',
+              border: 'none',
+              display: 'flex',
+              alignItems: 'center',
+            }}
+            icon={<SnippetsTwoTone twoToneColor="#FDDA0D" style={{ fontSize: '20px' }} />} // Adjust the font size of the icon
+          />
+        </span>
+      );
+    },
+  },
+  {
+    title: 'Item Type',
+    dataIndex: 'itemType',
+    render: (itemType) => {
+      let itemTypeText = '';
+      switch (itemType) {
+        case 'Journal Article':
+          itemTypeText = 'Journal Article';
+          break;
+        case 'Book':
+          itemTypeText = 'Book';
+          break;
+        case 'Web Page':
+          itemTypeText = 'Web Page';
+          break;
+        default:
+          itemTypeText = 'N/A';
+      }
+      return itemTypeText;
+    }
+  },
   {
     title: 'Title',
     dataIndex: 'title',
@@ -149,7 +176,7 @@ const sourceData = [
     authors: [{ firstName: 'Mehryar', lastName: 'Mohri' }, { firstName: 'Afshin', lastName: 'Rostamizadeh' }, { firstName: 'Ameet', lastName: 'Talwalkar' }],
     condensedAuthors: 'Mohri et al.',
     description: 'PDF here (?)',
-    notes: ['Note 1 for Foundations of Machine Learning'],
+    notes: [],
     itemType: 'Book'
   },
   {
