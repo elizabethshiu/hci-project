@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { DeleteOutlined } from '@ant-design/icons';
-import { Tabs, Layout, Menu, theme, Table, Card, Flex, Tag} from 'antd';
+import { DeleteOutlined, PlusOutlined, DownOutlined } from '@ant-design/icons';
+import { Tabs, Layout, Menu, theme, Table, Card, Button, Tooltip, Tag} from 'antd';
 import './app.css'; // Import CSS file
 import {
   SnippetsTwoTone
 } from '@ant-design/icons';
 
 const { Header, Content, Sider } = Layout;
-
-
 
 const navBarItems = [
   {
@@ -58,12 +56,24 @@ const rightSidebarItems = [
     label: 'Notes',
     render: (selectedSource) => {
       return selectedSource ? (
-        <Card title="Notes">
+        <Card title= {
+          <span>
+            <SnippetsTwoTone twoToneColor="#FDDA0D" style={{ marginRight: 8, fontSize: '20px' }} />
+            Notes
+          </span>
+        }
+        >
           {selectedSource.notes.map((note, index) => (
             <Card key={index} style={{ marginBottom: 16 }}>
               <p>{note}</p>
             </Card>
           ))}
+        
+          <Tooltip title="Add note">
+            <Button type="primary" shape="circle" icon={<PlusOutlined />} style={{ backgroundColor: '#34b233' }} />
+          </Tooltip>
+   
+
         </Card>
       ) : (
         <div></div> // Blank tab pane if no source is selected
@@ -73,7 +83,17 @@ const rightSidebarItems = [
   {
     key: 'tags',
     label: 'Tags',
-    render: () => <div>Content of Tab Pane 3</div>,
+    render: (selectedSource) => (
+      <div>
+        {selectedSource.tags.map((tag, index) => (
+          <Tag color="blue" key={index}>{tag}</Tag>
+        ))}
+
+          <Tooltip title="Add tag">
+            <Button type="primary" shape="circle" icon={<PlusOutlined />} style={{ backgroundColor: '#34b233', fontSize: '10px', padding: '4px' }} />
+          </Tooltip>
+      </div>
+    ),
   },
   {
     key: 'related',
@@ -93,15 +113,7 @@ const sourceColumns = [
       const concatenatedNotes = notes.join(', '); // Concatenate all notes into one string
       return (
         <span>
-          <Tag
-            style={{
-              background: 'transparent',
-              border: 'none',
-              display: 'flex',
-              alignItems: 'center',
-            }}
-            icon={<SnippetsTwoTone twoToneColor="#FDDA0D" style={{ fontSize: '20px' }} />} // Adjust the font size of the icon
-          />
+          <SnippetsTwoTone twoToneColor="#FDDA0D" style={{ fontSize: '20px' }} />
         </span>
       );
     },
@@ -159,7 +171,8 @@ const sourceData = [
     condensedAuthors: 'Turing',
     description: 'PDF here (?)',
     notes: ['Note 1 for I.—COMPUTING MACHINERY AND INTELLIGENCE', 'Note 2 for I.—COMPUTING MACHINERY AND INTELLIGENCE'],
-    itemType: 'Journal Article'
+    itemType: 'Journal Article',
+    tags: ['background', 'discussion']
   },
   {
     key: 2,
@@ -168,7 +181,8 @@ const sourceData = [
     condensedAuthors: 'Stuart & Norvig',
     description: 'PDF here (?)',
     notes: ['Note 1 for Artificial Intelligence: A Modern Approach', 'Note 2 for Artificial Intelligence: A Modern Approach'],
-    itemType: 'Book'
+    itemType: 'Book',
+    tags: ['background']
   },
   {
     key: 3,
@@ -177,7 +191,8 @@ const sourceData = [
     condensedAuthors: 'Mohri et al.',
     description: 'PDF here (?)',
     notes: [],
-    itemType: 'Book'
+    itemType: 'Book',
+    tags: []
   },
   {
     key: 4,
@@ -186,7 +201,8 @@ const sourceData = [
     condensedAuthors: 'N/A',
     description: 'N/A',
     notes: ['Note 1 for A New High In Deal Activity To Artificial Intelligence Startups In Q4\'15'],
-    itemType: 'Web Page'
+    itemType: 'Web Page',
+    tags: ['background', 'discussion']
   },
   {
     key: 5,
@@ -195,7 +211,8 @@ const sourceData = [
     condensedAuthors: 'Krizhevsky et al.',
     description: 'PDF here (?)',
     notes: ['Note 1 for ImageNet Classification with Deep Convolutional Neural Networks'],
-    itemType: 'Journal Article'
+    itemType: 'Journal Article',
+    tags :[]
   }
 ];
 
@@ -204,6 +221,7 @@ const App = () => {
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
+  
   
   const [selectedSource, setSelectedSource] = useState(null);
 
@@ -316,14 +334,17 @@ const App = () => {
           {!selectedSource && (
             <Card title="Notes">
               {sourceData.map(source => (
-                <div key={source.key}>
-                  <h3>{source.title}</h3>
-                  {source.notes.map((note, index) => (
-                    <Card key={index} style={{ marginBottom: 16 }}>
-                      <p>{note}</p>
-                    </Card>
-                  ))}
-                </div>
+                source.notes.length > 0 && (
+                  <div key={source.key}>
+                    <SnippetsTwoTone twoToneColor="#FDDA0D" style={{ fontSize: '20px' }} />
+                    <h3>{source.title}</h3>
+                    {source.notes.map((note, index) => (
+                      <Card key={index} style={{ marginBottom: 16 }}>
+                        <p>{note}</p>
+                      </Card>
+                    ))}
+                  </div>
+                )
               ))}
             </Card>
           )}
