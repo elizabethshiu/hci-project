@@ -1,15 +1,12 @@
-
-// import { ReactComponent as BookIcon } from './img/book.svg';
-// import { ReactComponent as JournalIcon } from './img/journal.svg';
-// import { ReactComponent as WebPageIcon } from './img/website.svg';
 import React, { useState, useEffect } from 'react';
-import { DeleteOutlined } from '@ant-design/icons';
-import { Tabs, Layout, Menu, theme, Table, Card } from 'antd';
+import { DeleteOutlined, PlusOutlined, DownOutlined } from '@ant-design/icons';
+import { Tabs, Layout, Menu, theme, Table, Card, Button, Tooltip, Tag} from 'antd';
 import './app.css'; // Import CSS file
+import {
+  SnippetsTwoTone
+} from '@ant-design/icons';
 
 const { Header, Content, Sider } = Layout;
-
-
 
 const navBarItems = [
   {
@@ -59,12 +56,24 @@ const rightSidebarItems = [
     label: 'Notes',
     render: (selectedSource) => {
       return selectedSource ? (
-        <Card title="Notes">
+        <Card title= {
+          <span>
+            <SnippetsTwoTone twoToneColor="#FDDA0D" style={{ marginRight: 8, fontSize: '20px' }} />
+            Notes
+          </span>
+        }
+        >
           {selectedSource.notes.map((note, index) => (
             <Card key={index} style={{ marginBottom: 16 }}>
               <p>{note}</p>
             </Card>
           ))}
+        
+          <Tooltip title="Add note">
+            <Button type="primary" shape="circle" icon={<PlusOutlined />} style={{ backgroundColor: '#34b233' }} />
+          </Tooltip>
+   
+
         </Card>
       ) : (
         <div></div> // Blank tab pane if no source is selected
@@ -74,7 +83,17 @@ const rightSidebarItems = [
   {
     key: 'tags',
     label: 'Tags',
-    render: () => <div>Content of Tab Pane 3</div>,
+    render: (selectedSource) => (
+      <div>
+        {selectedSource.tags.map((tag, index) => (
+          <Tag color="blue" key={index}>{tag}</Tag>
+        ))}
+
+          <Tooltip title="Add tag">
+            <Button type="primary" shape="circle" icon={<PlusOutlined />} style={{ backgroundColor: '#34b233', fontSize: '10px', padding: '4px' }} />
+          </Tooltip>
+      </div>
+    ),
   },
   {
     key: 'related',
@@ -98,22 +117,42 @@ const rightSidebarItems = [
 ];
 
 const sourceColumns = [
-  // {
-  //   title: 'ICON', // Empty title for the icon column
-  //   dataIndex: 'itemType',
-  //   render: (itemType) => {
-  //     switch (itemType) {
-  //       case 'Book':
-  //         return <BookIcon />;
-  //       case 'Journal Article':
-  //         return <JournalIcon />;
-  //       case 'Web Page':
-  //         return <WebPageIcon />;
-  //       default:
-  //         return null;
-  //     }
-  //   }
-  // },
+  {
+    title: '',
+    dataIndex: 'notes',
+    render: (notes) => {
+      if (!notes || notes.length === 0) {
+        return null; // If no notes, don't render anything
+      }
+      const concatenatedNotes = notes.join(', '); // Concatenate all notes into one string
+      return (
+        <span>
+          <SnippetsTwoTone twoToneColor="#FDDA0D" style={{ fontSize: '20px' }} />
+        </span>
+      );
+    },
+  },
+  {
+    title: 'Item Type',
+    dataIndex: 'itemType',
+    render: (itemType) => {
+      let itemTypeText = '';
+      switch (itemType) {
+        case 'Journal Article':
+          itemTypeText = 'Journal Article';
+          break;
+        case 'Book':
+          itemTypeText = 'Book';
+          break;
+        case 'Web Page':
+          itemTypeText = 'Web Page';
+          break;
+        default:
+          itemTypeText = 'N/A';
+      }
+      return itemTypeText;
+    }
+  },
   {
     title: 'Title',
     dataIndex: 'title',
@@ -147,6 +186,7 @@ const sourceData = [
     description: 'PDF here (?)',
     notes: ['Note 1 for I.—COMPUTING MACHINERY AND INTELLIGENCE', 'Note 2 for I.—COMPUTING MACHINERY AND INTELLIGENCE'],
     itemType: 'Journal Article',
+
     recommendations: [
       {
         title: 'Machine Learning: A Probabilistic Perspective',
@@ -164,6 +204,7 @@ const sourceData = [
         link: `https://www.google.com/search?q=Pattern+Recognition+and+Machine+Learning`
       }
     ]
+    tags: ['background', 'discussion']
   },
   {
     key: 2,
@@ -185,6 +226,7 @@ const sourceData = [
         link: `https://www.google.com/search?q=Introduction+to+Autonomous+Robots`
       }
     ]
+    tags: ['background']
   },
   {
     key: 3,
@@ -206,6 +248,9 @@ const sourceData = [
         link: `https://www.google.com/search?q=Machine+Learning+Yearning`
       }
     ]
+    notes: [],
+    itemType: 'Book',
+    tags: []
   },
   {
     key: 4,
@@ -216,6 +261,7 @@ const sourceData = [
     notes: ['Note 1 for A New High In Deal Activity To Artificial Intelligence Startups In Q4\'15'],
     itemType: 'Web Page',
     recommendations: [] // No recommendations for this item
+    tags: ['background', 'discussion']
   },
   {
     key: 5,
@@ -237,6 +283,7 @@ const sourceData = [
         link: `https://www.google.com/search?q=Deep+Learning`
       }
     ]
+    tags :[]
   }
 ];
 
@@ -244,6 +291,7 @@ const App = () => {
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
+  
   
   const [selectedSource, setSelectedSource] = useState(null);
 
@@ -356,14 +404,17 @@ const App = () => {
           {!selectedSource && (
             <Card title="Notes">
               {sourceData.map(source => (
-                <div key={source.key}>
-                  <h3>{source.title}</h3>
-                  {source.notes.map((note, index) => (
-                    <Card key={index} style={{ marginBottom: 16 }}>
-                      <p>{note}</p>
-                    </Card>
-                  ))}
-                </div>
+                source.notes.length > 0 && (
+                  <div key={source.key}>
+                    <SnippetsTwoTone twoToneColor="#FDDA0D" style={{ fontSize: '20px' }} />
+                    <h3>{source.title}</h3>
+                    {source.notes.map((note, index) => (
+                      <Card key={index} style={{ marginBottom: 16 }}>
+                        <p>{note}</p>
+                      </Card>
+                    ))}
+                  </div>
+                )
               ))}
             </Card>
           )}
