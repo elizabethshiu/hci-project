@@ -98,7 +98,21 @@ const rightSidebarItems = [
   {
     key: 'related',
     label: 'Related',
-    render: () => <div>Content of Tab Pane 4</div>,
+    render: (selectedSource) => {
+      return selectedSource ? (
+        <Card title="Recommended Articles">
+          {selectedSource.recommendations.map((recommendation, index) => (
+            <Card key={index} style={{ marginBottom: 16 }}>
+              <p>Title: {recommendation.title}</p>
+              <p>Author: {recommendation.author}</p>
+              <a href={recommendation.link} target="_blank" rel="noopener noreferrer">Link To Article</a>
+            </Card>
+          ))}
+        </Card>
+      ) : (
+        <div></div> // Blank tab pane if no source is selected
+      );
+    }
   },
 ];
 
@@ -172,6 +186,24 @@ const sourceData = [
     description: 'PDF here (?)',
     notes: ['Note 1 for I.—COMPUTING MACHINERY AND INTELLIGENCE', 'Note 2 for I.—COMPUTING MACHINERY AND INTELLIGENCE'],
     itemType: 'Journal Article',
+
+    recommendations: [
+      {
+        title: 'Machine Learning: A Probabilistic Perspective',
+        author: 'Kevin P. Murphy',
+        link: `https://www.google.com/search?q=Machine+Learning:+A+Probabilistic+Perspective`
+      },
+      {
+        title: 'Deep Learning for Natural Language Processing',
+        author: 'Yoshua Bengio, Ian Goodfellow, Aaron Courville',
+        link: `https://www.google.com/search?q=Deep+Learning+for+Natural+Language+Processing`
+      },
+      {
+        title: 'Pattern Recognition and Machine Learning',
+        author: 'Christopher M. Bishop',
+        link: `https://www.google.com/search?q=Pattern+Recognition+and+Machine+Learning`
+      }
+    ]
     tags: ['background', 'discussion']
   },
   {
@@ -182,6 +214,18 @@ const sourceData = [
     description: 'PDF here (?)',
     notes: ['Note 1 for Artificial Intelligence: A Modern Approach', 'Note 2 for Artificial Intelligence: A Modern Approach'],
     itemType: 'Book',
+    recommendations: [
+      {
+        title: 'Artificial Intelligence: Foundations of Computational Agents',
+        author: 'David L. Poole, Alan K. Mackworth',
+        link: `https://www.google.com/search?q=Artificial+Intelligence:+Foundations+of+Computational+Agents`
+      },
+      {
+        title: 'Introduction to Autonomous Robots',
+        author: 'Nikolaus Correll, Bradley Hayes',
+        link: `https://www.google.com/search?q=Introduction+to+Autonomous+Robots`
+      }
+    ]
     tags: ['background']
   },
   {
@@ -190,6 +234,20 @@ const sourceData = [
     authors: [{ firstName: 'Mehryar', lastName: 'Mohri' }, { firstName: 'Afshin', lastName: 'Rostamizadeh' }, { firstName: 'Ameet', lastName: 'Talwalkar' }],
     condensedAuthors: 'Mohri et al.',
     description: 'PDF here (?)',
+    notes: ['Note 1 for Foundations of Machine Learning'],
+    itemType: 'Book',
+    recommendations: [
+      {
+        title: 'Understanding Machine Learning: From Theory to Algorithms',
+        author: 'Shai Shalev-Shwartz, Shai Ben-David',
+        link: `https://www.google.com/search?q=Understanding+Machine+Learning:+From+Theory+to+Algorithms`
+      },
+      {
+        title: 'Machine Learning Yearning',
+        author: 'Andrew Ng',
+        link: `https://www.google.com/search?q=Machine+Learning+Yearning`
+      }
+    ]
     notes: [],
     itemType: 'Book',
     tags: []
@@ -202,6 +260,7 @@ const sourceData = [
     description: 'N/A',
     notes: ['Note 1 for A New High In Deal Activity To Artificial Intelligence Startups In Q4\'15'],
     itemType: 'Web Page',
+    recommendations: [] // No recommendations for this item
     tags: ['background', 'discussion']
   },
   {
@@ -212,10 +271,21 @@ const sourceData = [
     description: 'PDF here (?)',
     notes: ['Note 1 for ImageNet Classification with Deep Convolutional Neural Networks'],
     itemType: 'Journal Article',
+    recommendations: [
+      {
+        title: 'Neural Networks and Deep Learning',
+        author: 'Michael Nielsen',
+        link: `https://www.google.com/search?q=Neural+Networks+and+Deep+Learning`
+      },
+      {
+        title: 'Deep Learning',
+        author: 'Ian Goodfellow, Yoshua Bengio, Aaron Courville',
+        link: `https://www.google.com/search?q=Deep+Learning`
+      }
+    ]
     tags :[]
   }
 ];
-
 
 const App = () => {
   const {
