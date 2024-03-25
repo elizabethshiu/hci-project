@@ -186,7 +186,7 @@ const sourceData = [
     description: 'PDF here (?)',
     notes: ['Note 1 for I.—COMPUTING MACHINERY AND INTELLIGENCE', 'Note 2 for I.—COMPUTING MACHINERY AND INTELLIGENCE'],
     itemType: 'Journal Article',
-
+    tags: ['background', 'discussion'],
     recommendations: [
       {
         title: 'Machine Learning: A Probabilistic Perspective',
@@ -204,7 +204,7 @@ const sourceData = [
         link: `https://www.google.com/search?q=Pattern+Recognition+and+Machine+Learning`
       }
     ]
-    tags: ['background', 'discussion']
+    
   },
   {
     key: 2,
@@ -214,6 +214,7 @@ const sourceData = [
     description: 'PDF here (?)',
     notes: ['Note 1 for Artificial Intelligence: A Modern Approach', 'Note 2 for Artificial Intelligence: A Modern Approach'],
     itemType: 'Book',
+    tags: ['background'],
     recommendations: [
       {
         title: 'Artificial Intelligence: Foundations of Computational Agents',
@@ -226,7 +227,7 @@ const sourceData = [
         link: `https://www.google.com/search?q=Introduction+to+Autonomous+Robots`
       }
     ]
-    tags: ['background']
+    
   },
   {
     key: 3,
@@ -236,6 +237,7 @@ const sourceData = [
     description: 'PDF here (?)',
     notes: ['Note 1 for Foundations of Machine Learning'],
     itemType: 'Book',
+    tags: [],
     recommendations: [
       {
         title: 'Understanding Machine Learning: From Theory to Algorithms',
@@ -248,9 +250,6 @@ const sourceData = [
         link: `https://www.google.com/search?q=Machine+Learning+Yearning`
       }
     ]
-    notes: [],
-    itemType: 'Book',
-    tags: []
   },
   {
     key: 4,
@@ -260,8 +259,9 @@ const sourceData = [
     description: 'N/A',
     notes: ['Note 1 for A New High In Deal Activity To Artificial Intelligence Startups In Q4\'15'],
     itemType: 'Web Page',
+    tags: ['background', 'discussion'],
     recommendations: [] // No recommendations for this item
-    tags: ['background', 'discussion']
+    
   },
   {
     key: 5,
@@ -271,6 +271,7 @@ const sourceData = [
     description: 'PDF here (?)',
     notes: ['Note 1 for ImageNet Classification with Deep Convolutional Neural Networks'],
     itemType: 'Journal Article',
+    tags :[],
     recommendations: [
       {
         title: 'Neural Networks and Deep Learning',
@@ -283,7 +284,7 @@ const sourceData = [
         link: `https://www.google.com/search?q=Deep+Learning`
       }
     ]
-    tags :[]
+    
   }
 ];
 
