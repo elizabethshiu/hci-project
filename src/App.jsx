@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
+import { DeleteOutlined, PlusOutlined, DownOutlined } from '@ant-design/icons';
 import { Modal, Form, Input, Tabs, Layout, Menu, theme, Table, Card, Button, Tooltip, Tag} from 'antd';
 import './app.css'; // Import CSS file
 import {
   SnippetsTwoTone
 } from '@ant-design/icons';
 import LeftSideBar from './LeftSideBar';
-
 const { Header, Content, Sider } = Layout;
 
 const navBarItems = [
@@ -157,6 +156,7 @@ const sourceData = [
     description: 'PDF here (?)',
     notes: ['Note 1 for I.—COMPUTING MACHINERY AND INTELLIGENCE', 'Note 2 for I.—COMPUTING MACHINERY AND INTELLIGENCE'],
     itemType: 'Journal Article',
+    tags: ['background', 'discussion'],
     recommendations: [
       {
         title: 'Machine Learning: A Probabilistic Perspective',
@@ -185,6 +185,7 @@ const sourceData = [
     description: 'PDF here (?)',
     notes: ['Note 1 for Artificial Intelligence: A Modern Approach', 'Note 2 for Artificial Intelligence: A Modern Approach'],
     itemType: 'Book',
+    tags: ['background'],
     recommendations: [
       {
         title: 'Artificial Intelligence: Foundations of Computational Agents',
@@ -208,6 +209,7 @@ const sourceData = [
     description: 'PDF here (?)',
     notes: ['Note 1 for Foundations of Machine Learning'],
     itemType: 'Book',
+    tags: [],
     recommendations: [
       {
         title: 'Understanding Machine Learning: From Theory to Algorithms',
@@ -244,6 +246,7 @@ const sourceData = [
     description: 'PDF here (?)',
     notes: ['Note 1 for ImageNet Classification with Deep Convolutional Neural Networks'],
     itemType: 'Journal Article',
+    tags :[],
     recommendations: [
       {
         title: 'Neural Networks and Deep Learning',
