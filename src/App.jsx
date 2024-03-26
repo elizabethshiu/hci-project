@@ -1,48 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
-import { Tabs, Layout, Menu, theme, Table, Card, Button, Tooltip, Tag, Input} from 'antd';
+import { DeleteOutlined, PlusOutlined, DownOutlined } from '@ant-design/icons';
+import { Modal, Form, Input, Tabs, Layout, Menu, theme, Table, Card, Button, Tooltip, Tag} from 'antd';
 import './app.css'; // Import CSS file
 import {
   SnippetsTwoTone
 } from '@ant-design/icons';
-
+import LeftSideBar from './LeftSideBar';
 const { Header, Content, Sider } = Layout;
 
 const navBarItems = [
   {
-    label: "My Library",
-    key: "library",
-  }
-];
-
-const leftSidebarItems = [
-  {
-    label: "My Library",
-    key: "library",
-    children: [
-      {
-        label: "My Publications",
-        key: "publications"
-      },
-      {
-        label: "Duplicate Items",
-        key: "duplicates"
-      },
-      {
-        label: "Unfiled Items",
-        key: "unfiled"
-      },
-      {
-        label: "Trash",
-        key: "trash",
-        icon: <DeleteOutlined />,
-        onClick: () => {
-          console.log('clicked library')
-        }
-      }
-    ], 
-    
-  }
+    label: "Zotero",
+    key: "zotero",
+  },
 ];
 
 const rightSidebarItems = [
@@ -228,8 +198,9 @@ const sourceData = [
         author: 'Christopher M. Bishop',
         link: `https://www.google.com/search?q=Pattern+Recognition+and+Machine+Learning`
       }
-    ]
-    
+    ],
+    itemType: 'Journal Article',
+    tags: ['background', 'discussion']
   },
   {
     key: 2,
@@ -251,8 +222,9 @@ const sourceData = [
         author: 'Nikolaus Correll, Bradley Hayes',
         link: `https://www.google.com/search?q=Introduction+to+Autonomous+Robots`
       }
-    ]
-    
+    ],
+    itemType: 'Book',
+    tags: ['background']
   },
   {
     key: 3,
@@ -274,7 +246,10 @@ const sourceData = [
         author: 'Andrew Ng',
         link: `https://www.google.com/search?q=Machine+Learning+Yearning`
       }
-    ]
+    ],
+    notes: [],
+    itemType: 'Book',
+    tags: []
   },
   {
     key: 4,
@@ -284,9 +259,9 @@ const sourceData = [
     description: 'N/A',
     notes: [],
     itemType: 'Web Page',
-    tags: ['background', 'discussion'],
-    recommendations: [] // No recommendations for this item
-    
+    recommendations: [], // No recommendations for this item
+    itemType: 'Web Page',
+    tags: ['background', 'discussion']
   },
   {
     key: 5,
@@ -308,12 +283,14 @@ const sourceData = [
         author: 'Ian Goodfellow, Yoshua Bengio, Aaron Courville',
         link: `https://www.google.com/search?q=Deep+Learning`
       }
-    ]
-    
+    ],
+    itemType: 'Journal Article',
+    tags :[]
   }
 ];
 
 const App = () => {
+
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
@@ -370,25 +347,10 @@ const App = () => {
           }}
         />
       </Header>
-
+      
       <Layout>
-        <Sider
-          width={200}
-          style={{
-            background: colorBgContainer,
-          }}
-        >
-          <Menu
-            mode="inline"
-            defaultSelectedKeys={['1']}
-            defaultOpenKeys={['library']}
-            style={{
-              height: '100%',
-              borderRight: 0,
-            }}
-            items={leftSidebarItems}
-          />
-        </Sider>
+        <LeftSideBar>
+        </LeftSideBar>
         <Layout
           style={{
             padding: '0 24px 24px',
