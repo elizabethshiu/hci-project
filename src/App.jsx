@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { DeleteOutlined, PlusOutlined, DownOutlined } from '@ant-design/icons';
+import { DeleteOutlined, PlusOutlined, CloseOutlined, DownOutlined } from '@ant-design/icons';
 import { Tabs, Layout, Menu, theme, Table, Card, Button, Tooltip, Tag, Input} from 'antd';
 import './app.css'; // Import CSS file
 import {
@@ -203,6 +203,8 @@ const App = () => {
   
   const [showNoteInput, setShowNoteInput] = useState(false);
   const [newNote, setNewNote] = useState("");
+  const [showTagInput, setShowTagInput] = useState(false);
+  const [newTag, setNewTag] = useState("");
   const [selectedSource, setSelectedSource] = useState(null);
 
   const onSourceRowClick = (record) => {
@@ -223,7 +225,7 @@ const App = () => {
       // Don't add empty notes
       return;
     }
-
+  
     // Add the new note to the selected source
     const updatedSelectedSource = {
       ...selectedSource,
@@ -236,8 +238,47 @@ const App = () => {
     setNewNote("");
   };
 
+  const handleDoneButtonClick = () => {
+    addNewNote();
+    toggleNoteInput(); // Hide the note input after adding the note
+  };
+
   const toggleNoteInput = () => {
     setShowNoteInput(!showNoteInput);
+    setNewNote(""); // Clear the input field when toggling
+  };
+
+  const handleNewTagChange = (e) => {
+    setNewTag(e.target.value);
+  };
+  
+  const addNewTag = () => {
+    // Perform any validation if needed
+    if (newTag.trim() === "") {
+      // Don't add empty tags
+      return;
+    }
+  
+    // Add the new tag to the selected source
+    const updatedSelectedSource = {
+      ...selectedSource,
+      tags: [...selectedSource.tags, newTag]
+    };
+  
+    // Update the selected source with the new tag
+    setSelectedSource(updatedSelectedSource);
+    // Clear the new tag input
+    setNewTag("");
+  };
+  
+  const handleTagDoneButtonClick = () => {
+    addNewTag();
+    toggleTagInput(); // Hide the tag input after adding the tag
+  };
+  
+  const toggleTagInput = () => {
+    setShowTagInput(!showTagInput);
+    setNewTag(""); // Clear the input field when toggling
   };
 
   const rightSidebarItems = [
@@ -254,17 +295,17 @@ const App = () => {
     },
     {
       key: 'notes',
-    label: 'Notes',
-    render: (selectedSource) => {
-      return selectedSource ? (
-        <Card
-          title={
-            <span>
-              <SnippetsTwoTone twoToneColor="#FDDA0D" style={{ marginRight: 8, fontSize: '20px' }} />
-              Notes
-            </span>
-          }
-          >
+      label: 'Notes',
+      render: (selectedSource) => {
+        return selectedSource ? (
+          <Card
+            title={
+              <span>
+                <SnippetsTwoTone twoToneColor="#FDDA0D" style={{ marginRight: 8, fontSize: '20px' }} />
+                Notes
+              </span>
+            }
+            >
             {selectedSource.notes.map((note, index) => (
               <Card key={index} style={{ marginBottom: 16 }}>
                 <p>{note}</p>
@@ -279,25 +320,31 @@ const App = () => {
                   onChange={handleNewNoteChange}
                   style={{ marginBottom: 16 }}
                 />
-                <Tooltip title="Add note">
+                <Tooltip title="Cancel">
                   <Button
                     type="primary"
                     shape="circle"
-                    icon={<PlusOutlined />}
-                    style={{ backgroundColor: '#34b233', marginRight: 8 }}
-                    onClick={addNewNote}
+                    icon={<CloseOutlined />}
+                    style={{ backgroundColor: 'red', marginRight: 8 }}
+                    onClick={toggleNoteInput}
                   />
                 </Tooltip>
+                <div style={{ float: 'right' }}>
+                  <Tooltip title="Done">
+                    <Button type="primary" onClick={handleDoneButtonClick}>Done</Button>
+                  </Tooltip>
+                </div>
               </div>
             )}
             {!showNoteInput && (
-              <Tooltip title="Show note input">
+              <Tooltip title="Add note">
                 <Button
                   type="primary"
+                  shape="circle"
+                  icon={<PlusOutlined />}
+                  style={{ backgroundColor: '#34b233', marginBottom: 16 }}
                   onClick={toggleNoteInput}
-                >
-                  + Notes
-                </Button>
+                />
               </Tooltip>
             )}
           </Card>
@@ -315,9 +362,41 @@ const App = () => {
             {selectedSource.tags.map((tag, index) => (
               <Tag color="blue" key={index}>{tag}</Tag>
             ))}
-            <Tooltip title="Add tag">
-              <Button type="primary" shape="circle" icon={<PlusOutlined />} style={{ backgroundColor: '#34b233', fontSize: '10px', padding: '4px' }} />
-            </Tooltip>
+            {showTagInput && (
+              <div>
+                <Input
+                  placeholder="Add new tag"
+                  value={newTag}
+                  onChange={handleNewTagChange}
+                  style={{ marginBottom: 16 }}
+                />
+                <Tooltip title="Cancel">
+                  <Button
+                    type="primary"
+                    shape="circle"
+                    icon={<CloseOutlined />}
+                    style={{ backgroundColor: 'red', marginRight: 8 }}
+                    onClick={toggleTagInput}
+                  />
+                </Tooltip>
+                <div style={{ float: 'right' }}>
+                  <Tooltip title="Done">
+                    <Button type="primary" onClick={handleTagDoneButtonClick}>Done</Button>
+                  </Tooltip>
+                </div>
+              </div>
+            )}
+            {!showTagInput && (
+              <Tooltip title="Add tag">
+                <Button
+                  type="primary"
+                  shape="circle"
+                  icon={<PlusOutlined />}
+                  style={{ backgroundColor: '#34b233', marginBottom: 16 }}
+                  onClick={toggleTagInput}
+                />
+              </Tooltip>
+            )}
           </div>
         ) : (
           <div>No source selected</div>
