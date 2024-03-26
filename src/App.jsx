@@ -1,113 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { DeleteOutlined, PlusOutlined, DownOutlined } from '@ant-design/icons';
-import { Modal, Form, Input, Tabs, Layout, Menu, theme, Table, Card, Button, Tooltip, Tag} from 'antd';
+import { Tabs, Layout, Menu, theme, Table, Card, Button, Tooltip, Tag, Input} from 'antd';
 import './app.css'; // Import CSS file
 import {
   SnippetsTwoTone
 } from '@ant-design/icons';
 import LeftSideBar from './LeftSideBar';
+
 const { Header, Content, Sider } = Layout;
+const { TextArea } = Input; // Destructure TextArea from Input
 
 const navBarItems = [
   {
     label: "Zotero",
     key: "zotero",
-  },
-];
-
-const rightSidebarItems = [
-  {
-    key: 'info',
-    label: 'Info',
-    render: (selectedSource) => (
-      selectedSource ? (
-        <div>{selectedSource.description}</div>
-      ) : (
-        <div>No source selected</div>
-      )
-    )
-  },
-  {
-    key: 'notes',
-    label: 'Notes',
-    render: (selectedSource, handleAddNote, handleNoteChange, handleNoteSubmit, newNote, addingNote) => {
-      return selectedSource ? (
-        <Card
-          title={
-            <span>
-              <SnippetsTwoTone twoToneColor="#FDDA0D" style={{ marginRight: 8, fontSize: '20px' }} />
-              Notes
-            </span>
-          }
-        >
-          {selectedSource.notes.map((note, index) => (
-            <Card key={index} style={{ marginBottom: 16 }}>
-              <p>{note}</p>
-            </Card>
-          ))}
-  
-          {addingNote ? (
-            <div>
-              <Input
-                value={newNote}
-                onChange={handleNoteChange}
-                onPressEnter={handleNoteSubmit}
-              />
-              <Button type="primary" onClick={handleNoteSubmit}>Add</Button>
-            </div>
-          ) : (
-            <Tooltip title="Add note">
-              <Button
-                type="primary"
-                shape="circle"
-                icon={<PlusOutlined />}
-                onClick={handleAddNote}
-                style={{ backgroundColor: '#34b233' }}
-              />
-            </Tooltip>
-          )}
-        </Card>
-      ) : (
-        <div></div> // Blank tab pane if no source is selected
-      );
-    }
-  },
-  {
-    key: 'tags',
-    label: 'Tags',
-    render: (selectedSource) => (
-      selectedSource ? (
-        <div>
-          {selectedSource.tags.map((tag, index) => (
-            <Tag color="blue" key={index}>{tag}</Tag>
-          ))}
-          <Tooltip title="Add tag">
-            <Button type="primary" shape="circle" icon={<PlusOutlined />} style={{ backgroundColor: '#34b233', fontSize: '10px', padding: '4px' }} />
-          </Tooltip>
-        </div>
-      ) : (
-        <div>No source selected</div>
-      )
-    ),
-  },
-  {
-    key: 'related',
-    label: 'Related',
-    render: (selectedSource) => {
-      return selectedSource ? (
-        <Card title="Recommended Articles">
-          {selectedSource.recommendations.map((recommendation, index) => (
-            <Card key={index} style={{ marginBottom: 16 }}>
-              <p>Title: {recommendation.title}</p>
-              <p>Author: {recommendation.author}</p>
-              <a href={recommendation.link} target="_blank" rel="noopener noreferrer">Link To Article</a>
-            </Card>
-          ))}
-        </Card>
-      ) : (
-        <div></div> // Blank tab pane if no source is selected
-      );
-    }
   },
 ];
 
@@ -295,12 +201,9 @@ const App = () => {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
   
-  
+  const [showNoteInput, setShowNoteInput] = useState(false);
+  const [newNote, setNewNote] = useState("");
   const [selectedSource, setSelectedSource] = useState(null);
-  
-  //ADD NOTE STUFF
-  const [addingNote, setAddingNote] = useState(false);
-  const [newNote, setNewNote] = useState('');
 
   const onSourceRowClick = (record) => {
     setSelectedSource(record);
@@ -310,23 +213,137 @@ const App = () => {
     console.log(key);
   }; 
 
-  const handleAddNote = () => {
-    if (selectedSource) {
-      setAddingNote(true); // Show the input box if a source is selected
-    }
-  };
-  
-  const handleNoteChange = (e) => {
+  const handleNewNoteChange = (e) => {
     setNewNote(e.target.value);
   };
-  
-  const handleNoteSubmit = () => {
-    // Logic to add the new note
-    // Reset the input field and state
-    setNewNote('');
-    setAddingNote(false);
+  // Function to add a new note
+  const addNewNote = () => {
+    // Perform any validation if needed
+    if (newNote.trim() === "") {
+      // Don't add empty notes
+      return;
+    }
+
+    // Add the new note to the selected source
+    const updatedSelectedSource = {
+      ...selectedSource,
+      notes: [...selectedSource.notes, newNote]
+    };
+    
+    // Update the selected source with the new note
+    setSelectedSource(updatedSelectedSource);
+    // Clear the new note input
+    setNewNote("");
   };
-  //END OF ADD NOTE STUFF
+
+  const toggleNoteInput = () => {
+    setShowNoteInput(!showNoteInput);
+  };
+
+  const rightSidebarItems = [
+    {
+      key: 'info',
+      label: 'Info',
+      render: (selectedSource) => (
+        selectedSource ? (
+          <div>{selectedSource.description}</div>
+        ) : (
+          <div>No source selected</div>
+        )
+      )
+    },
+    {
+      key: 'notes',
+    label: 'Notes',
+    render: (selectedSource) => {
+      return selectedSource ? (
+        <Card
+          title={
+            <span>
+              <SnippetsTwoTone twoToneColor="#FDDA0D" style={{ marginRight: 8, fontSize: '20px' }} />
+              Notes
+            </span>
+          }
+          >
+            {selectedSource.notes.map((note, index) => (
+              <Card key={index} style={{ marginBottom: 16 }}>
+                <p>{note}</p>
+              </Card>
+            ))}
+            {showNoteInput && (
+              <div>
+                <TextArea
+                  placeholder="Add new note"
+                  rows={4}
+                  value={newNote}
+                  onChange={handleNewNoteChange}
+                  style={{ marginBottom: 16 }}
+                />
+                <Tooltip title="Add note">
+                  <Button
+                    type="primary"
+                    shape="circle"
+                    icon={<PlusOutlined />}
+                    style={{ backgroundColor: '#34b233', marginRight: 8 }}
+                    onClick={addNewNote}
+                  />
+                </Tooltip>
+              </div>
+            )}
+            {!showNoteInput && (
+              <Tooltip title="Show note input">
+                <Button
+                  type="primary"
+                  onClick={toggleNoteInput}
+                >
+                  + Notes
+                </Button>
+              </Tooltip>
+            )}
+          </Card>
+        ) : (
+          <div>No source selected</div>
+        );
+      }
+    },
+    {
+      key: 'tags',
+      label: 'Tags',
+      render: (selectedSource) => (
+        selectedSource ? (
+          <div>
+            {selectedSource.tags.map((tag, index) => (
+              <Tag color="blue" key={index}>{tag}</Tag>
+            ))}
+            <Tooltip title="Add tag">
+              <Button type="primary" shape="circle" icon={<PlusOutlined />} style={{ backgroundColor: '#34b233', fontSize: '10px', padding: '4px' }} />
+            </Tooltip>
+          </div>
+        ) : (
+          <div>No source selected</div>
+        )
+      ),
+    },
+    {
+      key: 'related',
+      label: 'Related',
+      render: (selectedSource) => {
+        return selectedSource ? (
+          <Card title="Recommended Articles">
+            {selectedSource.recommendations.map((recommendation, index) => (
+              <Card key={index} style={{ marginBottom: 16 }}>
+                <p>Title: {recommendation.title}</p>
+                <p>Author: {recommendation.author}</p>
+                <a href={recommendation.link} target="_blank" rel="noopener noreferrer">Link To Article</a>
+              </Card>
+            ))}
+          </Card>
+        ) : (
+          <div></div> // Blank tab pane if no source is selected
+        );
+      }
+    },
+  ];
 
   return (
     <Layout>
@@ -389,30 +406,20 @@ const App = () => {
             />
           </Content>
         </Layout>
-        <Sider
-          width={400}
-          style={{
-            background: colorBgContainer,
-            paddingLeft: 12
-          }}
-        >
-          {selectedSource && !addingNote && (
-          <Tabs defaultActiveKey="1" items={rightSidebarItems.map(item => ({
-            ...item,
-            children: item.render(selectedSource)
-          }))} onChange={onRightSidebarChange} />
+        {selectedSource && (
+          <Sider
+            width={400}
+            style={{
+              background: colorBgContainer,
+              paddingLeft: 12
+            }}
+          >
+            <Tabs defaultActiveKey="1" items={rightSidebarItems.map(item => ({
+              ...item,
+              children: item.render(selectedSource, newNote, handleNewNoteChange, addNewNote) // Pass newNote and its functions
+            }))} onChange={onRightSidebarChange} />
+          </Sider>
         )}
-        {addingNote && selectedSource && (
-          <div>
-            <Input
-              value={newNote}
-              onChange={handleNoteChange}
-              onPressEnter={handleNoteSubmit}
-            />
-            <Button type="primary" onClick={handleNoteSubmit}>Add</Button>
-          </div>
-        )}
-        </Sider>
       </Layout>
     </Layout>
   );
