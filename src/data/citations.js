@@ -1,7 +1,7 @@
 const citationData = [
   {
     key: 1,
-    title: '',
+    title: 'I.—COMPUTING MACHINERY AND INTELLIGENCE',
     authors: [{ firstName: 'Alan', lastName: 'Turing' }],
     condensedAuthors: 'Turing',
     description: 'PDF here (?)',
