@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { DeleteOutlined, PlusOutlined, DownOutlined } from '@ant-design/icons';
-import { Modal, Form, Input, Tabs, Layout, Menu, theme, Table, Card, Button, Tooltip, Tag} from 'antd';
+import {Tabs, Layout, Menu, theme, Table, Card, Button, Tooltip, Tag} from 'antd';
 import './app.css'; // Import CSS file
-import InfoForm from './infoForm';
-import sourceData from './data/citations';
+import InfoForm from './components/infoForm';
+import citationData from './data/citations';
 import {
   SnippetsTwoTone
 } from '@ant-design/icons';
@@ -21,7 +21,7 @@ const rightSidebarItems = [
   {
     key: 'info',
     label: 'Info',
-    render: (sourceData) => <InfoForm/>,
+    render: (selectedSource) => <InfoForm selectedSource={selectedSource}/>,
   },
   {
     key: 'notes',
@@ -88,7 +88,7 @@ const rightSidebarItems = [
   },
 ];
 
-const sourceColumns = [
+const tableColumns = [
   {
     title: '',
     dataIndex: 'notes',
@@ -151,6 +151,7 @@ const sourceColumns = [
 
 
 const App = () => {
+  const [sourceData, setSourceData] = useState(citationData);
 
   const {
     token: { colorBgContainer, borderRadiusLG },
@@ -170,9 +171,9 @@ const App = () => {
   useEffect(() => {
     const handleOutsideClick = (event) => {
       const isClickInsideTable = event.target.closest('.ant-table');
-      if (!isClickInsideTable) {
-        setSelectedSource(null); // Reset selected source when clicking outside the table
-      }
+      // if (!isClickInsideTable) {
+      //   setSelectedSource(null); // Reset selected source when clicking outside the table
+      // }
     };
 
     document.addEventListener('click', handleOutsideClick);
@@ -181,6 +182,11 @@ const App = () => {
       document.removeEventListener('click', handleOutsideClick);
     };
   }, []);
+
+  useEffect(() => {
+    console.log(citationData)
+    setSourceData(citationData);
+  }, [sourceData])
 
   return (
     <Layout>
@@ -220,7 +226,7 @@ const App = () => {
             }}
           >
             <Table
-              columns={sourceColumns}
+              columns={tableColumns}
               expandable={{
                 expandedRowRender: (record) => (
                   <p
@@ -234,10 +240,12 @@ const App = () => {
                 rowExpandable: (record) => record.title !== 'Not Expandable',
               }}
               dataSource={sourceData}
+              rowClassName={(record, index) => ((record.title.length && record.authors.length) ? "complete" : "incomplete")}
               pagination={false}
               onRow={(record, rowIndex) => ({
                 onClick: () => {
                   onSourceRowClick(record);
+                  console.log(record.title.length);
                 }
               })}
             />

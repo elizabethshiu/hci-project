@@ -1,7 +1,7 @@
-const sourceData = [
+const citationData = [
   {
     key: 1,
-    title: 'I.—COMPUTING MACHINERY AND INTELLIGENCE',
+    title: '',
     authors: [{ firstName: 'Alan', lastName: 'Turing' }],
     condensedAuthors: 'Turing',
     description: 'PDF here (?)',
@@ -24,7 +24,7 @@ const sourceData = [
         author: 'Christopher M. Bishop',
         link: `https://www.google.com/search?q=Pattern+Recognition+and+Machine+Learning`
       }
-    ]
+    ],
     
   },
   {
@@ -47,8 +47,7 @@ const sourceData = [
         author: 'Nikolaus Correll, Bradley Hayes',
         link: `https://www.google.com/search?q=Introduction+to+Autonomous+Robots`
       }
-    ]
-    
+    ]    
   },
   {
     key: 3,
@@ -108,4 +107,4 @@ const sourceData = [
     
   }
 ]
-export default sourceData
+export default citationData
