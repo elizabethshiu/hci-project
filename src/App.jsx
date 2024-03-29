@@ -174,7 +174,7 @@ const App = () => {
       label: 'Info',
       render: (selectedSource) => (
         selectedSource ? (
-          <div>{selectedSource.description}</div>
+          <InfoForm selectedSource={selectedSource}/>
         ) : (
           <div>No source selected</div>
         )
