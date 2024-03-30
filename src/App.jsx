@@ -1,12 +1,33 @@
 import React, { useState, useEffect } from 'react';
-import { DeleteOutlined, PlusOutlined, DownOutlined } from '@ant-design/icons';
-import { Modal, Form, Input, Tabs, Layout, Menu, theme, Table, Card, Button, Tooltip, Tag} from 'antd';
+import { DeleteOutlined, PlusOutlined, DownOutlined, MinusCircleOutlined } from '@ant-design/icons';
+import { Select, Modal, Form, Input, Tabs, Layout, Menu, theme, Table, Card, Button, Tooltip, Tag } from 'antd';
 import './app.css'; // Import CSS file
 import {
   SnippetsTwoTone
 } from '@ant-design/icons';
-import LeftSideBar from './LeftSideBar';
+import LeftSideBar, { getActiveFolderKey, getActiveChildFolderKey, sideBarFolder } from './LeftSideBar';
+
 const { Header, Content, Sider } = Layout;
+
+let articleCount = 0;
+
+const formItemLayout = {
+  labelCol: {
+    xs: { span: 24 },
+    sm: { span: 4 },
+  },
+  wrapperCol: {
+    xs: { span: 24 },
+    sm: { span: 20 },
+  },
+};
+
+const formItemLayoutWithOutLabel = {
+  wrapperCol: {
+    xs: { span: 24, offset: 0 },
+    sm: { span: 20, offset: 4 },
+  },
+};
 
 const navBarItems = [
   {
@@ -26,7 +47,7 @@ const rightSidebarItems = [
     label: 'Notes',
     render: (selectedSource) => {
       return selectedSource ? (
-        <Card title= {
+        <Card title={
           <span>
             <SnippetsTwoTone twoToneColor="#FDDA0D" style={{ marginRight: 8, fontSize: '20px' }} />
             Notes
@@ -38,11 +59,11 @@ const rightSidebarItems = [
               <p>{note}</p>
             </Card>
           ))}
-        
+
           <Tooltip title="Add note">
             <Button type="primary" shape="circle" icon={<PlusOutlined />} style={{ backgroundColor: '#34b233' }} />
           </Tooltip>
-   
+
 
         </Card>
       ) : (
@@ -59,9 +80,9 @@ const rightSidebarItems = [
           <Tag color="blue" key={index}>{tag}</Tag>
         ))}
 
-          <Tooltip title="Add tag">
-            <Button type="primary" shape="circle" icon={<PlusOutlined />} style={{ backgroundColor: '#34b233', fontSize: '10px', padding: '4px' }} />
-          </Tooltip>
+        <Tooltip title="Add tag">
+          <Button type="primary" shape="circle" icon={<PlusOutlined />} style={{ backgroundColor: '#34b233', fontSize: '10px', padding: '4px' }} />
+        </Tooltip>
       </div>
     ),
   },
@@ -150,13 +171,13 @@ const sourceColumns = [
 const sourceData = [
   {
     key: 1,
+    parentKey: "0MyPublications",
     title: 'I.—COMPUTING MACHINERY AND INTELLIGENCE',
     authors: [{ firstName: 'Alan', lastName: 'Turing' }],
     condensedAuthors: 'Turing',
     description: 'PDF here (?)',
     notes: ['Note 1 for I.—COMPUTING MACHINERY AND INTELLIGENCE', 'Note 2 for I.—COMPUTING MACHINERY AND INTELLIGENCE'],
     itemType: 'Journal Article',
-    tags: ['background', 'discussion'],
     recommendations: [
       {
         title: 'Machine Learning: A Probabilistic Perspective',
@@ -179,13 +200,13 @@ const sourceData = [
   },
   {
     key: 2,
+    parentKey: "0MyPublications",
     title: 'Artificial Intelligence: A Modern Approach',
     authors: [{ firstName: 'Peter', lastName: 'Stuart' }, { firstName: 'Peter', lastName: 'Norvig' }],
     condensedAuthors: 'Stuart & Norvig',
     description: 'PDF here (?)',
     notes: ['Note 1 for Artificial Intelligence: A Modern Approach', 'Note 2 for Artificial Intelligence: A Modern Approach'],
     itemType: 'Book',
-    tags: ['background'],
     recommendations: [
       {
         title: 'Artificial Intelligence: Foundations of Computational Agents',
@@ -203,13 +224,13 @@ const sourceData = [
   },
   {
     key: 3,
+    parentKey: "0MyPublications",
     title: 'Foundations of Machine Learning',
     authors: [{ firstName: 'Mehryar', lastName: 'Mohri' }, { firstName: 'Afshin', lastName: 'Rostamizadeh' }, { firstName: 'Ameet', lastName: 'Talwalkar' }],
     condensedAuthors: 'Mohri et al.',
     description: 'PDF here (?)',
     notes: ['Note 1 for Foundations of Machine Learning'],
     itemType: 'Book',
-    tags: [],
     recommendations: [
       {
         title: 'Understanding Machine Learning: From Theory to Algorithms',
@@ -222,31 +243,30 @@ const sourceData = [
         link: `https://www.google.com/search?q=Machine+Learning+Yearning`
       }
     ],
-    notes: [],
     itemType: 'Book',
     tags: []
   },
   {
     key: 4,
+    parentKey: "0MyPublications",
     title: 'A New High In Deal Activity To Artificial Intelligence Startups In Q4\'15',
     authors: [],
     condensedAuthors: 'N/A',
     description: 'N/A',
     notes: ['Note 1 for A New High In Deal Activity To Artificial Intelligence Startups In Q4\'15'],
-    itemType: 'Web Page',
     recommendations: [], // No recommendations for this item
     itemType: 'Web Page',
     tags: ['background', 'discussion']
   },
   {
     key: 5,
+    parentKey: "0MyPublications",
     title: 'ImageNet Classification with Deep Convolutional Neural Networks',
     authors: [{ firstName: 'Alex', lastName: 'Krizhevsky' }, { firstName: 'Ilya', lastName: 'Sutskever' }, { firstName: 'Geoffrey', lastName: 'Hinton' }],
     condensedAuthors: 'Krizhevsky et al.',
     description: 'PDF here (?)',
     notes: ['Note 1 for ImageNet Classification with Deep Convolutional Neural Networks'],
     itemType: 'Journal Article',
-    tags :[],
     recommendations: [
       {
         title: 'Neural Networks and Deep Learning',
@@ -260,17 +280,51 @@ const sourceData = [
       }
     ],
     itemType: 'Journal Article',
-    tags :[]
+    tags: []
   }
 ];
 
 const App = () => {
 
+  const [dataSource, setDataSource] = useState(null);
+  const [modalAddFile, setModalAddFile] = useState(false);
+  const [fileForm] = Form.useForm();
+
+
+  const checkDisabled = function () {
+    if (getActiveChildFolderKey() == -1) {
+      return true;
+    }
+    return false;
+  }
+
+  const getSourceData = function () {
+    if (sideBarFolder.length == 0) {
+      setDataSource([]);
+    }
+    else {
+      let temp = sideBarFolder[getActiveFolderKey()].data.filter((data) => {
+        return data.parentKey == getActiveChildFolderKey();
+      })
+      setDataSource(temp);
+    }
+  }
+
+  const getCondensedAuthors = function () {
+    let temp = fileForm.getFieldsValue("authorNames").authorNames;
+    if (temp.length != 0){
+      return temp[0].lastName + " et al.";
+    }
+    else{
+      return 'N/A';
+    }
+  }
+
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
-  
-  
+
+
   const [selectedSource, setSelectedSource] = useState(null);
 
   const onSourceRowClick = (record) => {
@@ -279,7 +333,7 @@ const App = () => {
 
   const onRightSidebarChange = (key) => {
     console.log(key);
-  }; 
+  };
 
   useEffect(() => {
     const handleOutsideClick = (event) => {
@@ -315,15 +369,136 @@ const App = () => {
           }}
         />
       </Header>
-      
+
       <Layout>
-        <LeftSideBar>
-        </LeftSideBar>
+        <ManagerContext.Provider value={{ dataSource, setDataSource }}>
+          <LeftSideBar>
+          </LeftSideBar>
+        </ManagerContext.Provider>
+
         <Layout
           style={{
             padding: '0 24px 24px',
           }}
         >
+          <Button
+            disabled={checkDisabled()}
+            type="primary"
+            style={{ backgroundColor: '#2596be' }}
+            onClick={() => {
+              setModalAddFile(true);
+            }}
+          >
+            Add File <PlusOutlined />
+          </Button>
+
+          <Modal
+            title="Add File"
+            centered="true"
+            open={modalAddFile}
+            onCancel={() => {
+              fileForm.resetFields();
+              setModalAddFile(false);
+            }}
+            footer={[]}
+          >
+            <Form
+              form={fileForm}
+              onFinish={() => {
+                setModalAddFile(false);
+                sideBarFolder[getActiveFolderKey()].data.unshift({
+                  key: articleCount,
+                  parentKey: getActiveChildFolderKey(),
+                  title: fileForm.getFieldValue("fileName"),
+                  authors: fileForm.getFieldsValue("authorNames").authorNames,
+                  condensedAuthors: getCondensedAuthors(),
+                  description: 'N/A',
+                  notes: [],
+                  recommendations: [], // No recommendations for this item
+                  itemType: fileForm.getFieldValue("itemType"),
+                  tags: []
+                });
+                articleCount++;
+                getSourceData();
+                fileForm.resetFields();
+              }}
+            >
+              Enter the Source Title:
+              <Form.Item
+                name="fileName"
+              >
+                <Input placeholder='Enter a Title'></Input>
+              </Form.Item>
+              Select a Source Type:
+              <Form.Item
+                name="itemType"
+              >
+                <Select
+                  options={[
+                    { value: '', label: '' },
+                    { value: 'Web Page', label: 'Web Page' },
+                    { value: 'Book', label: 'Book' },
+                    { value: 'Journal Article', label: 'Journal Article' },
+                  ]}
+                />
+              </Form.Item>
+              Enter Author Names:
+              <Form.List
+                name="authorNames"
+              >
+                {(fields, { add, remove }, { errors }) => (
+                  <>
+                    {fields.map((field) => (
+
+                      <Form.Item
+                        required={false}
+                        key={field.key}
+                      >
+                        <Form.Item
+                          {...field}
+                          noStyle
+                          name={[field.name, "firstName"]}
+                          key={[field.key, "fname"]}
+                        >
+                          <Input placeholder="Author First Name" style={{ width: '45%' }} />
+                        </Form.Item>
+                        <Form.Item
+                          {...field}
+                          noStyle
+                          name={[field.name, "lastName"]}
+                          key={[field.key, "lName"]}
+                        >
+                          <Input placeholder="Author Last Name" style={{ width: '45%' }} />
+                        </Form.Item>
+                        <MinusCircleOutlined
+                          className="dynamic-delete-button"
+                          onClick={() => remove(field.name)} />
+                      </Form.Item>
+                    ))}
+                    <Form.Item>
+                      <Button
+                        type="dashed"
+                        onClick={() => add()}
+                        style={{ width: '60%' }}
+                        icon={<PlusOutlined />}
+                      >
+                        Add field
+                      </Button>
+                      <Form.ErrorList errors={errors} />
+                    </Form.Item>
+                  </>
+                )}
+              </Form.List>
+              <Form.Item
+                name="submitFileName"
+              >
+                <Button key="submit" type="primary" htmlType="submit">
+                  Submit
+                </Button>
+              </Form.Item>
+            </Form>
+          </Modal>
+
           <Content
             style={{
               padding: 24,
@@ -333,6 +508,7 @@ const App = () => {
               borderRadius: borderRadiusLG,
             }}
           >
+
             <Table
               columns={sourceColumns}
               expandable={{
@@ -347,7 +523,7 @@ const App = () => {
                 ),
                 rowExpandable: (record) => record.title !== 'Not Expandable',
               }}
-              dataSource={sourceData}
+              dataSource={dataSource}
               pagination={false}
               onRow={(record, rowIndex) => ({
                 onClick: () => {
@@ -355,8 +531,10 @@ const App = () => {
                 }
               })}
             />
+
           </Content>
         </Layout>
+
         <Sider
           width={400}
           style={{
@@ -389,8 +567,9 @@ const App = () => {
           )}
         </Sider>
       </Layout>
-    </Layout>
+    </Layout >
   );
 };
 
+export const ManagerContext = React.createContext(null);
 export default App;
