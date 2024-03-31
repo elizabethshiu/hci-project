@@ -12,7 +12,6 @@ let childrenCount = 0;
 let folderName = "";
 
 function LeftSideBar() {
-    const [leftNavBar, setLeftNavBar] = useState(leftSidebarItems);
     const [modalAddFolder, setModalAddFolder] = useState(false);
     const [modalAddDocFolder, setModalAddDocFolder] = useState(false);
     const [modalDeleteFolder, setModalDeleteFolder] = useState(false);
@@ -162,7 +161,7 @@ function LeftSideBar() {
                         })
                         count++;
                         let temp = leftSidebarItems.slice();
-                        setLeftNavBar(temp);
+                        data.setLeftNavBar(temp);
                     }}
                 >
                     <Form.Item
@@ -186,7 +185,7 @@ function LeftSideBar() {
                 </Form>
             </Modal>
             <Modal
-                title="Add Document Folder"
+                title="Add Sub-Folder"
                 centered="true"
                 open={modalAddDocFolder}
                 onCancel={() => {
@@ -205,7 +204,7 @@ function LeftSideBar() {
                         let index = leftSidebarItems.findIndex(function (folder) {
                             return folder.key == activeKey;
                         });
-                        let keyChild = leftSidebarItems[index].children.length + folderName;
+                        let keyChild = childrenCount + folderName;
                         leftSidebarItems[index].children.unshift({
                             label: folderName,
                             key: childrenCount + folderName,
@@ -222,7 +221,7 @@ function LeftSideBar() {
                         });
                         childrenCount++;
                         let temp = leftSidebarItems.slice();
-                        setLeftNavBar(temp);
+                        data.setLeftNavBar(temp);
                     }}
                 >
                     <Form.Item
@@ -261,7 +260,7 @@ function LeftSideBar() {
                     leftSidebarItems.splice(removeIndex,1);
                     let temp = leftSidebarItems.slice();
                     setModalDeleteFolder(false);
-                    setLeftNavBar(temp);
+                    data.setLeftNavBar(temp);
                     data.setDataSource([])
                 }}
             >
@@ -275,7 +274,7 @@ function LeftSideBar() {
                     height: '100%',
                     borderRight: 0,
                 }}
-                items={leftNavBar}
+                items={data.leftNavBar}
             />
         </Layout.Sider>
     )

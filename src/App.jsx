@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { DeleteOutlined, PlusOutlined, DownOutlined, MinusCircleOutlined, CloseOutlined } from '@ant-design/icons';
-import { Select, Modal, Form, Input, Tabs, Layout, Menu, theme, Table, Card, Button, Tooltip, Tag } from 'antd';
+import { Select, Modal, Form, Input, Tabs, Layout, Menu, theme, Table, Card, Button, Tooltip, Tag, Row, Col } from 'antd';
 import './app.css'; // Import CSS file
 import {
   SnippetsTwoTone
@@ -175,11 +175,20 @@ const App = () => {
 
   const [dataSource, setDataSource] = useState([]);
   const [modalAddFile, setModalAddFile] = useState(false);
+  const [modalDeleteSubFolder, setModalDeleteSubFolder] = useState(false);
+  const [leftNavBar, setLeftNavBar] = useState(getLeftSideBar());
   const [fileForm] = Form.useForm();
 
 
   const checkDisabled = function () {
     if (getActiveChildFolderKey() == -1) {
+      return true;
+    }
+    return false;
+  }
+
+  const checkSubFolderDisabled = function () {
+    if (getActiveChildFolderKey() == -1 || getActiveChildFolderKey() == getActiveFolderKey()+"addFolder" || getActiveChildFolderKey() == getActiveFolderKey()+"publications" || getActiveChildFolderKey() == getActiveFolderKey()+"duplicates" || getActiveChildFolderKey() == getActiveFolderKey()+"unfiled" || getActiveChildFolderKey() == getActiveFolderKey()+"trash" || getActiveChildFolderKey() == getActiveFolderKey()+"delete") {
       return true;
     }
     return false;
@@ -262,7 +271,7 @@ const App = () => {
       </Header>
 
       <Layout>
-        <ManagerContext.Provider value={{ dataSource, setDataSource, checkDisabled }}>
+        <ManagerContext.Provider value={{ dataSource, setDataSource, checkDisabled, leftNavBar, setLeftNavBar }}>
           <LeftSideBar>
           </LeftSideBar>
         </ManagerContext.Provider>
@@ -425,8 +434,54 @@ const App = () => {
                   }
                 })}
               />
+              <br/>
+              <Row>
+              <Col span={6} />
+              <Col span={12}>
+              <Button
+              icon={<CloseOutlined/>}
+              style={{width: '100%'}}
+              danger
+              disabled={checkSubFolderDisabled()}
+              onClick={() =>{
+                setModalDeleteSubFolder(true);
+              }}
+              >Delete Sub-Folder</Button>
+              </Col>
+              <Col span={6} />
+              </Row>
             </ManagerContext.Provider>
           </Content>
+          <Modal
+                title="Confirm Deletion of Sub-Folder"
+                centered="true"
+                open={modalDeleteSubFolder}
+                onCancel={() => {
+                    setModalDeleteSubFolder(false)
+                }}
+                onOk={() => {
+                    let parentIndex = getLeftSideBar().findIndex((data) => {
+                        return data.key == getActiveFolderKey();
+                    });
+                    while (getLeftSideBar()[parentIndex].data.indexOf(getActiveChildFolderKey()) != -1){
+                      let index = getLeftSideBar()[parentIndex].data.indexOf(getActiveChildFolderKey())
+                      getLeftSideBar()[parentIndex].data.splice(index,1);
+                    }
+                    console.log(getLeftSideBar())
+                    console.log(getActiveChildFolderKey())
+                    let subFolderIndex = getLeftSideBar()[parentIndex].children.findIndex((folders) => {
+                        return folders.key == getActiveChildFolderKey();
+                    });
+                    console.log(subFolderIndex)
+
+                    getLeftSideBar()[parentIndex].children.splice(subFolderIndex, 1);
+                    getSourceData();
+                    let temp = getLeftSideBar().slice();
+                    setLeftNavBar(temp);
+                    setModalDeleteSubFolder(false);
+                }}
+            >
+            </Modal>
         </Layout>
 
         <Sider

@@ -35,15 +35,17 @@ function DeleteSource() {
                     let dataIndex = sidebar[parentIndex].data.findIndex((data) => {
                         return data.key == getSourceKey();
                     });
-                    getLeftSideBar()[parentIndex].data.splice(dataIndex, 1);
-                    let index = getLeftSideBar().findIndex((data) => {
-                        return data.key == getActiveFolderKey();
-                    })
-                    console.log(getLeftSideBar())
-                    let temp = getLeftSideBar()[index].data.filter((data) => {
+                    if (sidebar[parentIndex].data[dataIndex].parentKey != getActiveFolderKey() + "trash") {
+                        sidebar[parentIndex].data[dataIndex].parentKey = getActiveFolderKey() + "trash";
+                    }
+                    else {
+                        getLeftSideBar()[parentIndex].data.splice(dataIndex, 1);
+                    }
+                    let temp = getLeftSideBar()[parentIndex].data.filter((data) => {
                         return data.parentKey == getActiveChildFolderKey();
                     })
                     data.setDataSource(temp);
+                    setModalDeleteFile(false)
                 }}
             >
             </Modal>
