@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { DeleteOutlined, PlusOutlined, CloseOutlined, DownOutlined } from '@ant-design/icons';
 import { Tabs, Layout, Menu, theme, Table, Card, Button, Tooltip, Tag, Input} from 'antd';
 import './app.css'; // Import CSS file
@@ -83,6 +83,7 @@ const tableColumns = [
 
 const App = () => {
   const [sourceData, setSourceData] = useState(citationData);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const {
     token: { colorBgContainer, borderRadiusLG },
@@ -311,6 +312,12 @@ const App = () => {
     },
   ];
 
+  const filteredData = sourceData.filter((item) =>
+  Object.values(item).some((value) =>
+    value && typeof value === "string" && value.toLowerCase().includes(searchTerm.toLowerCase())
+  )
+);
+
   return (
     <Layout>
       <Header
@@ -329,6 +336,13 @@ const App = () => {
             minWidth: 0,
           }}
         />
+        <Input
+          placeholder="Search..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          style={{ marginLeft: 'auto', marginRight: 10, width: 200 }}
+        />
+        <Button onClick={() => setSearchTerm('')}><CloseOutlined /></Button>
       </Header>
       
       <Layout>
@@ -362,7 +376,7 @@ const App = () => {
                 ),
                 rowExpandable: (record) => record.title !== 'Not Expandable',
               }}
-              dataSource={sourceData}
+              dataSource={filteredData}
               rowClassName={(record, index) => ((record.title.length && record.authors.length) ? "complete" : "incomplete")}
               pagination={false}
               onRow={(record, rowIndex) => ({
