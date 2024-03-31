@@ -1,15 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { DeleteOutlined, PlusOutlined, DownOutlined, MinusCircleOutlined } from '@ant-design/icons';
+import React, { useState, useEffect, useContext } from 'react';
+import { DeleteOutlined, PlusOutlined, DownOutlined, MinusCircleOutlined, CloseOutlined } from '@ant-design/icons';
 import { Select, Modal, Form, Input, Tabs, Layout, Menu, theme, Table, Card, Button, Tooltip, Tag } from 'antd';
 import './app.css'; // Import CSS file
 import {
   SnippetsTwoTone
 } from '@ant-design/icons';
-import LeftSideBar, { getActiveFolderKey, getActiveChildFolderKey, sideBarFolder } from './LeftSideBar';
+import LeftSideBar, { getActiveFolderKey, getActiveChildFolderKey, getLeftSideBar } from './LeftSideBar';
+import DeleteSource from './DeleteSource'
 
 const { Header, Content, Sider } = Layout;
 
 let articleCount = 0;
+let sourceKey = -1;
 
 const formItemLayout = {
   labelCol: {
@@ -164,129 +166,14 @@ const sourceColumns = [
     title: 'Action',
     dataIndex: '',
     key: 'x',
-    render: () => <a>Delete</a>,
+    render: () =>
+      <DeleteSource />,
   },
-];
-
-const sourceData = [
-  {
-    key: 1,
-    parentKey: "0MyPublications",
-    title: 'I.—COMPUTING MACHINERY AND INTELLIGENCE',
-    authors: [{ firstName: 'Alan', lastName: 'Turing' }],
-    condensedAuthors: 'Turing',
-    description: 'PDF here (?)',
-    notes: ['Note 1 for I.—COMPUTING MACHINERY AND INTELLIGENCE', 'Note 2 for I.—COMPUTING MACHINERY AND INTELLIGENCE'],
-    itemType: 'Journal Article',
-    recommendations: [
-      {
-        title: 'Machine Learning: A Probabilistic Perspective',
-        author: 'Kevin P. Murphy',
-        link: `https://www.google.com/search?q=Machine+Learning:+A+Probabilistic+Perspective`
-      },
-      {
-        title: 'Deep Learning for Natural Language Processing',
-        author: 'Yoshua Bengio, Ian Goodfellow, Aaron Courville',
-        link: `https://www.google.com/search?q=Deep+Learning+for+Natural+Language+Processing`
-      },
-      {
-        title: 'Pattern Recognition and Machine Learning',
-        author: 'Christopher M. Bishop',
-        link: `https://www.google.com/search?q=Pattern+Recognition+and+Machine+Learning`
-      }
-    ],
-    itemType: 'Journal Article',
-    tags: ['background', 'discussion']
-  },
-  {
-    key: 2,
-    parentKey: "0MyPublications",
-    title: 'Artificial Intelligence: A Modern Approach',
-    authors: [{ firstName: 'Peter', lastName: 'Stuart' }, { firstName: 'Peter', lastName: 'Norvig' }],
-    condensedAuthors: 'Stuart & Norvig',
-    description: 'PDF here (?)',
-    notes: ['Note 1 for Artificial Intelligence: A Modern Approach', 'Note 2 for Artificial Intelligence: A Modern Approach'],
-    itemType: 'Book',
-    recommendations: [
-      {
-        title: 'Artificial Intelligence: Foundations of Computational Agents',
-        author: 'David L. Poole, Alan K. Mackworth',
-        link: `https://www.google.com/search?q=Artificial+Intelligence:+Foundations+of+Computational+Agents`
-      },
-      {
-        title: 'Introduction to Autonomous Robots',
-        author: 'Nikolaus Correll, Bradley Hayes',
-        link: `https://www.google.com/search?q=Introduction+to+Autonomous+Robots`
-      }
-    ],
-    itemType: 'Book',
-    tags: ['background']
-  },
-  {
-    key: 3,
-    parentKey: "0MyPublications",
-    title: 'Foundations of Machine Learning',
-    authors: [{ firstName: 'Mehryar', lastName: 'Mohri' }, { firstName: 'Afshin', lastName: 'Rostamizadeh' }, { firstName: 'Ameet', lastName: 'Talwalkar' }],
-    condensedAuthors: 'Mohri et al.',
-    description: 'PDF here (?)',
-    notes: ['Note 1 for Foundations of Machine Learning'],
-    itemType: 'Book',
-    recommendations: [
-      {
-        title: 'Understanding Machine Learning: From Theory to Algorithms',
-        author: 'Shai Shalev-Shwartz, Shai Ben-David',
-        link: `https://www.google.com/search?q=Understanding+Machine+Learning:+From+Theory+to+Algorithms`
-      },
-      {
-        title: 'Machine Learning Yearning',
-        author: 'Andrew Ng',
-        link: `https://www.google.com/search?q=Machine+Learning+Yearning`
-      }
-    ],
-    itemType: 'Book',
-    tags: []
-  },
-  {
-    key: 4,
-    parentKey: "0MyPublications",
-    title: 'A New High In Deal Activity To Artificial Intelligence Startups In Q4\'15',
-    authors: [],
-    condensedAuthors: 'N/A',
-    description: 'N/A',
-    notes: ['Note 1 for A New High In Deal Activity To Artificial Intelligence Startups In Q4\'15'],
-    recommendations: [], // No recommendations for this item
-    itemType: 'Web Page',
-    tags: ['background', 'discussion']
-  },
-  {
-    key: 5,
-    parentKey: "0MyPublications",
-    title: 'ImageNet Classification with Deep Convolutional Neural Networks',
-    authors: [{ firstName: 'Alex', lastName: 'Krizhevsky' }, { firstName: 'Ilya', lastName: 'Sutskever' }, { firstName: 'Geoffrey', lastName: 'Hinton' }],
-    condensedAuthors: 'Krizhevsky et al.',
-    description: 'PDF here (?)',
-    notes: ['Note 1 for ImageNet Classification with Deep Convolutional Neural Networks'],
-    itemType: 'Journal Article',
-    recommendations: [
-      {
-        title: 'Neural Networks and Deep Learning',
-        author: 'Michael Nielsen',
-        link: `https://www.google.com/search?q=Neural+Networks+and+Deep+Learning`
-      },
-      {
-        title: 'Deep Learning',
-        author: 'Ian Goodfellow, Yoshua Bengio, Aaron Courville',
-        link: `https://www.google.com/search?q=Deep+Learning`
-      }
-    ],
-    itemType: 'Journal Article',
-    tags: []
-  }
 ];
 
 const App = () => {
 
-  const [dataSource, setDataSource] = useState(null);
+  const [dataSource, setDataSource] = useState([]);
   const [modalAddFile, setModalAddFile] = useState(false);
   const [fileForm] = Form.useForm();
 
@@ -299,11 +186,14 @@ const App = () => {
   }
 
   const getSourceData = function () {
-    if (sideBarFolder.length == 0) {
+    if (getLeftSideBar().length == 0) {
       setDataSource([]);
     }
     else {
-      let temp = sideBarFolder[getActiveFolderKey()].data.filter((data) => {
+      let index = getLeftSideBar().findIndex((data) => {
+        return data.key == getActiveFolderKey();
+      })
+      let temp = getLeftSideBar()[index].data.filter((data) => {
         return data.parentKey == getActiveChildFolderKey();
       })
       setDataSource(temp);
@@ -312,10 +202,10 @@ const App = () => {
 
   const getCondensedAuthors = function () {
     let temp = fileForm.getFieldsValue("authorNames").authorNames;
-    if (temp.length != 0){
+    if (temp != undefined && temp.length != 0) {
       return temp[0].lastName + " et al.";
     }
-    else{
+    else {
       return 'N/A';
     }
   }
@@ -329,6 +219,7 @@ const App = () => {
 
   const onSourceRowClick = (record) => {
     setSelectedSource(record);
+    sourceKey = record.key;
   };
 
   const onRightSidebarChange = (key) => {
@@ -371,7 +262,7 @@ const App = () => {
       </Header>
 
       <Layout>
-        <ManagerContext.Provider value={{ dataSource, setDataSource }}>
+        <ManagerContext.Provider value={{ dataSource, setDataSource, checkDisabled }}>
           <LeftSideBar>
           </LeftSideBar>
         </ManagerContext.Provider>
@@ -389,11 +280,11 @@ const App = () => {
               setModalAddFile(true);
             }}
           >
-            Add File <PlusOutlined />
+            Add Source <PlusOutlined />
           </Button>
 
           <Modal
-            title="Add File"
+            title="Add Source"
             centered="true"
             open={modalAddFile}
             onCancel={() => {
@@ -406,7 +297,10 @@ const App = () => {
               form={fileForm}
               onFinish={() => {
                 setModalAddFile(false);
-                sideBarFolder[getActiveFolderKey()].data.unshift({
+                let index = getLeftSideBar().findIndex((data) => {
+                  return data.key == getActiveFolderKey();
+                })
+                getLeftSideBar()[index].data.unshift({
                   key: articleCount,
                   parentKey: getActiveChildFolderKey(),
                   title: fileForm.getFieldValue("fileName"),
@@ -508,30 +402,30 @@ const App = () => {
               borderRadius: borderRadiusLG,
             }}
           >
-
-            <Table
-              columns={sourceColumns}
-              expandable={{
-                expandedRowRender: (record) => (
-                  <p
-                    style={{
-                      margin: 0,
-                    }}
-                  >
-                    {record.description}
-                  </p>
-                ),
-                rowExpandable: (record) => record.title !== 'Not Expandable',
-              }}
-              dataSource={dataSource}
-              pagination={false}
-              onRow={(record, rowIndex) => ({
-                onClick: () => {
-                  onSourceRowClick(record);
-                }
-              })}
-            />
-
+            <ManagerContext.Provider value={{ dataSource, setDataSource, checkDisabled }}>
+              <Table
+                columns={sourceColumns}
+                expandable={{
+                  expandedRowRender: (record) => (
+                    <p
+                      style={{
+                        margin: 0,
+                      }}
+                    >
+                      {record.description}
+                    </p>
+                  ),
+                  rowExpandable: (record) => record.title !== 'Not Expandable',
+                }}
+                dataSource={dataSource}
+                pagination={false}
+                onRow={(record, rowIndex) => ({
+                  onClick: () => {
+                    onSourceRowClick(record);
+                  }
+                })}
+              />
+            </ManagerContext.Provider>
           </Content>
         </Layout>
 
@@ -544,7 +438,7 @@ const App = () => {
         >
           {!selectedSource && (
             <Card title="Notes">
-              {sourceData.map(source => (
+              {dataSource.map(source => (
                 source.notes.length > 0 && (
                   <div key={source.key}>
                     <SnippetsTwoTone twoToneColor="#FDDA0D" style={{ fontSize: '20px' }} />
@@ -572,4 +466,7 @@ const App = () => {
 };
 
 export const ManagerContext = React.createContext(null);
+export function getSourceKey() {
+  return sourceKey;
+}
 export default App;
