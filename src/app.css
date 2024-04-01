@@ -56,8 +56,8 @@
 }
 
 .incomplete{
-  color: red; 
+  color: orange; 
 }
 .complete {
-   color :green; 
+   color :black; 
 }

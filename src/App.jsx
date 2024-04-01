@@ -140,15 +140,21 @@ const App = () => {
 
   const [sourceData, setSourceData] = useState(citationData);
 
-  const {
-    token: { colorBgContainer, borderRadiusLG },
-  } = theme.useToken();
-
   const [showNoteInput, setShowNoteInput] = useState(false);
   const [newNote, setNewNote] = useState("");
   const [showTagInput, setShowTagInput] = useState(false);
   const [newTag, setNewTag] = useState("");
   const [selectedSource, setSelectedSource] = useState(null);
+
+  useEffect(() => {
+    setSourceData(citationData);
+  }, [citationData])
+
+  const {
+    token: { colorBgContainer, borderRadiusLG },
+  } = theme.useToken();
+  
+  
 
   const onSourceRowClick = (record) => {
     setSelectedSource(record);
