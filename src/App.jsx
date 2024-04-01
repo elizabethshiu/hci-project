@@ -368,7 +368,7 @@ const App = () => {
                 rowExpandable: (record) => record.title !== 'Not Expandable',
               }}
               dataSource={sourceData}
-              rowClassName={(record, index) => ((record.title.length && record.authors.length) ? "complete" : "incomplete")}
+              rowClassName={(record, index) => ((record.title.length && record.authors.length && record.itemType.length) ? "complete" : "incomplete")}
               pagination={false}
               onRow={(record, rowIndex) => ({
                 onClick: () => {
