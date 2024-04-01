@@ -2,16 +2,18 @@ import React, { useEffect, useState } from 'react';
 import { Space, Select, Input, Button, Row, DatePicker } from 'antd';
 import { PlusCircleOutlined, MinusCircleOutlined } from '@ant-design/icons';
 import citationData from '../data/citations';
+import dayjs from 'dayjs';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+
+
+dayjs.extend(customParseFormat);
+const dateFormat = 'YYYY-MM-DD';
 const { TextArea } = Input;
 
 const itemTypes = [
     {
         value: 'Journal Article',
         label: 'Journal Article'
-    },
-    {
-        value: 'Newspaper Article',
-        label: 'Newspaper Article'
     },
     {
         value: 'Book',
@@ -23,53 +25,71 @@ const itemTypes = [
     },
 ]
 
-
-
-
-
-const InfoForm = (selectedSource, citationKey) => {
+const InfoForm = (selectedSource) => {
     const sourceData = selectedSource.selectedSource;
     const [citation, setCitation] = useState(sourceData)
+    const [title, setTitle] = useState(citation.title);
     const [authors, setAuthors] = useState(citation.authors);
     const [itemType, setItemType] = useState(citation.itemType);
+    const [publishDate, setPublishDate] = useState(citation.publishDate);
+    const [abstract, setAbstract] = useState(citation.description);
+    const [url, setUrl] = useState(citation.url);
 
     useEffect(() => {
         const citation = selectedSource.selectedSource
         setCitation(citation)
+        setTitle(citation.title)
         setAuthors(citation.authors)
         setItemType(citation.itemType)
+        setPublishDate(citation.publishDate)
         console.log(citationData)
-    }, [selectedSource, citationData])
-
+    }, [selectedSource])
 
     const handleItemTypeChange = (value) => {
-        console.log(value);
-        // console.log(sourceData.itemType);
         sourceData.itemType = value;
-        console.log(citationData)
         setItemType(value);
     }
 
     const handleAddAuthor = () => {
-    setAuthors([...authors, { firstName: "", lastName: "" }]);
+        const newAuthors = [...authors, { firstName: "", lastName: "" }];
+        setAuthors(newAuthors);
     };
 
-    const handleChange = (event, index) => {
-    let { name, value } = event.target;
-    let onChangeValue = [...authors];
-    onChangeValue[index][name] = value;
-    setAuthors(onChangeValue);
+    const handleAuthorChange = (event, index) => {
+        let { name, value } = event.target;
+        let onChangeValue = [...authors];
+        onChangeValue[index][name] = value;
+        sourceData.authors= onChangeValue;
+        setAuthors(onChangeValue);
     };
 
-    const handleDeleteAAuthor = (index) => {
-    const newArray = [...authors];
-    newArray.splice(index, 1);
-    setAuthors(newArray);
+    const handleDeleteAuthor = (index) => {
+        const newArray = [...authors];
+        newArray.splice(index, 1);
+        sourceData.authors= newArray;
+        setAuthors(newArray);
     };
 
     const handleDateChange = (date, dateString) => {
-    console.log(date, dateString);
+        console.log(date, dateString);
+        sourceData.publishDate = dateString;
+        setPublishDate(dateString);
     };
+
+    const handleAbstractChange = (event) => {
+        sourceData.description = event.target.value;
+        setAbstract(event.target.value);
+    }
+
+    const handleUrlChange = (event) => {
+        sourceData.url = event.target.value;
+        setUrl(event.target.value);
+    }
+
+    const handleTitleChange = (event) => {
+        sourceData.title = event.target.value;
+        setTitle(event.target.value);
+    }
 
     return(
         <>
@@ -78,8 +98,8 @@ const InfoForm = (selectedSource, citationKey) => {
                 <label>Title</label>
                 <Input 
                     name='title'
-                    value={sourceData.title}
-                    placeholder='title'
+                    value={title}
+                    onChange={handleTitleChange}
                 />
             </div>
             <div>
@@ -98,6 +118,7 @@ const InfoForm = (selectedSource, citationKey) => {
                     <label style={{paddingRight: 5}}>Publish Date</label>
                     <DatePicker 
                         onChange={handleDateChange} 
+                        value={dayjs(publishDate, dateFormat)}
                     />
                 </Row>
             </div>
@@ -109,7 +130,7 @@ const InfoForm = (selectedSource, citationKey) => {
                         name="firstName"
                         placeholder="First Name"
                         value={item.firstName}
-                        onChange={(event) => handleChange(event, index)}
+                        onChange={(event) => handleAuthorChange(event, index)}
                         style={{
                             width: 160,
                             padding: 3
@@ -119,7 +140,7 @@ const InfoForm = (selectedSource, citationKey) => {
                         name="lastName"
                         placeholder="Last Name"
                         value={item.lastName}
-                        onChange={(event) => handleChange(event, index)}
+                        onChange={(event) => handleAuthorChange(event, index)}
                         style={{
                             width: 160,
                             padding: 3
@@ -128,7 +149,7 @@ const InfoForm = (selectedSource, citationKey) => {
                     {authors.length > 1 && (
                         <Button 
                             shape='circle'
-                            onClick={() => handleDeleteAAuthor(index)}
+                            onClick={() => handleDeleteAuthor(index)}
                             icon={<MinusCircleOutlined />}
                         />
                     )}
@@ -144,10 +165,17 @@ const InfoForm = (selectedSource, citationKey) => {
             </div>
             <div className='abstract'>
                 <label>Abstract</label>
-                <TextArea rows={4} />
+                <TextArea 
+                    rows={4}
+                    value={abstract} 
+                    onChange={handleAbstractChange}
+                />
 
                 <label>URL</label>
-                <Input></Input>
+                <Input
+                    value={url}
+                    onChange={handleUrlChange}
+                />
             </div>
             
         </Space>

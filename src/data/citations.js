@@ -3,11 +3,13 @@ const citationData = [
     key: 1,
     title: 'I.—COMPUTING MACHINERY AND INTELLIGENCE',
     authors: [{ firstName: 'Alan', lastName: 'Turing' }],
+    publishDate: '1950-03-05',
     condensedAuthors: 'Turing',
-    description: 'PDF here (?)',
+    description: 'Computing Machinery and Intelligence" is a seminal paper written by Alan Turing on the topic of artificial intelligence. The paper, published in 1950 in Mind, was the first to introduce his concept of what is now known as the Turing test to the general public.',
     notes: ['Note 1 for I.—COMPUTING MACHINERY AND INTELLIGENCE', 'Note 2 for I.—COMPUTING MACHINERY AND INTELLIGENCE'],
     itemType: 'Journal Article',
     tags: ['background', 'discussion'],
+    url: 'https://academic.oup.com/mind/article/LIX/236/433/986238',
     recommendations: [
       {
         title: 'Machine Learning: A Probabilistic Perspective',
@@ -31,11 +33,13 @@ const citationData = [
     key: 2,
     title: 'Artificial Intelligence: A Modern Approach',
     authors: [{ firstName: 'Peter', lastName: 'Stuart' }, { firstName: 'Peter', lastName: 'Norvig' }],
+    publishDate: '2020-10-16',
     condensedAuthors: 'Stuart & Norvig',
     description: 'PDF here (?)',
     notes: ['Note 1 for Artificial Intelligence: A Modern Approach', 'Note 2 for Artificial Intelligence: A Modern Approach'],
     itemType: 'Book',
     tags: ['background'],
+    url: '',
     recommendations: [
       {
         title: 'Artificial Intelligence: Foundations of Computational Agents',
@@ -53,11 +57,13 @@ const citationData = [
     key: 3,
     title: 'Foundations of Machine Learning',
     authors: [{ firstName: 'Mehryar', lastName: 'Mohri' }, { firstName: 'Afshin', lastName: 'Rostamizadeh' }, { firstName: 'Ameet', lastName: 'Talwalkar' }],
+    publishDate: '2001-07-09',
     condensedAuthors: 'Mohri et al.',
     description: 'PDF here (?)',
     notes: ['Note 1 for Foundations of Machine Learning'],
     itemType: 'Book',
     tags: [],
+    url: '',
     recommendations: [
       {
         title: 'Understanding Machine Learning: From Theory to Algorithms',
@@ -75,11 +81,13 @@ const citationData = [
     key: 4,
     title: 'A New High In Deal Activity To Artificial Intelligence Startups In Q4\'15',
     authors: [],
+    publishDate: '',
     condensedAuthors: 'N/A',
     description: 'N/A',
     notes: ['Note 1 for A New High In Deal Activity To Artificial Intelligence Startups In Q4\'15'],
     itemType: 'Web Page',
     tags: ['background', 'discussion'],
+    url: '',
     recommendations: [] // No recommendations for this item
     
   },
@@ -87,11 +95,13 @@ const citationData = [
     key: 5,
     title: 'ImageNet Classification with Deep Convolutional Neural Networks',
     authors: [{ firstName: 'Alex', lastName: 'Krizhevsky' }, { firstName: 'Ilya', lastName: 'Sutskever' }, { firstName: 'Geoffrey', lastName: 'Hinton' }],
+    publishDate: '2022-03-05',
     condensedAuthors: 'Krizhevsky et al.',
     description: 'PDF here (?)',
     notes: ['Note 1 for ImageNet Classification with Deep Convolutional Neural Networks'],
     itemType: 'Journal Article',
     tags :[],
+    url: '',
     recommendations: [
       {
         title: 'Neural Networks and Deep Learning',
