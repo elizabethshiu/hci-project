@@ -473,7 +473,7 @@ const App = () => {
                   recommendations: [], // No recommendations for this item
                   itemType: fileForm.getFieldValue("itemType"),
                   tags: [],
-                  published: "",
+                  publishDate: "",
                   abstract: "",
                   url: "",
                 });
@@ -625,8 +625,6 @@ const App = () => {
                 let index = getLeftSideBar()[parentIndex].data.indexOf(getActiveChildFolderKey())
                 getLeftSideBar()[parentIndex].data.splice(index, 1);
               }
-              console.log(getLeftSideBar())
-              console.log(getActiveChildFolderKey())
               let subFolderIndex = getLeftSideBar()[parentIndex].children.findIndex((folders) => {
                 return folders.key == getActiveChildFolderKey();
               });

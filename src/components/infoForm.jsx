@@ -25,6 +25,10 @@ const itemTypes = [
         value: 'Web Page',
         label: 'Web Page'
     },
+    { 
+        value: 'Newspaper Article', 
+        label: 'Newspaper Article' 
+    },
 ]
 
 const InfoForm = (selectedSource) => {
@@ -45,11 +49,19 @@ const InfoForm = (selectedSource) => {
         setAuthors(citation.authors)
         setItemType(citation.itemType)
         setPublishDate(citation.publishDate)
+        setAbstract(citation.description)
+        setUrl(citation.url)
         console.log(citationData)
     }, [selectedSource])
 
     const getSourceData = function () {
-        if (sourceData.authors != undefined && sourceData.authors.length != 0 && sourceData.authors[0].lastName != "") {
+        if (sourceData.authors != undefined && sourceData.authors.length != 0 && sourceData.authors[0].lastName != "" && sourceData.authors.length == 1) {
+            sourceData.condensedAuthors = sourceData.authors[0].lastName;
+        }
+        else if(sourceData.authors != undefined && sourceData.authors.length != 0 && sourceData.authors[0].lastName != "" && sourceData.authors.length == 2){
+            sourceData.condensedAuthors = sourceData.authors[0].lastName + " & " + sourceData.authors[1].lastName;
+        }
+        else if(sourceData.authors != undefined && sourceData.authors.length != 0 && sourceData.authors[0].lastName != "" && sourceData.authors.length == 3){
             sourceData.condensedAuthors = sourceData.authors[0].lastName + " et al.";
         }
         else {
@@ -115,6 +127,7 @@ const InfoForm = (selectedSource) => {
     const handleUrlChange = (event) => {
         sourceData.url = event.target.value;
         setUrl(event.target.value);
+        console.log(sourceData)
         getSourceData()
     }
 
@@ -151,7 +164,7 @@ const InfoForm = (selectedSource) => {
                         <label style={{ paddingRight: 5 }}>Publish Date</label>
                         <DatePicker
                             onChange={handleDateChange}
-                            
+                            value={(dayjs(publishDate, dateFormat).$d != "Invalid Date") ? dayjs(publishDate, dateFormat) : null}
                         />
                     </Row>
                 </div>

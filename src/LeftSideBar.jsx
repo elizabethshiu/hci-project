@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useContext } from 'react';
 import { DeleteOutlined, CloseOutlined, PlusOutlined } from '@ant-design/icons';
 import { Layout, Modal, Form, theme, Input, Menu, Button } from 'antd';
 import './app.css'; // Import CSS file
 import { ManagerContext } from './App';
+import citationData from './data/citations';
 
 let leftSidebarItems = []
 let activeKey = -1;
@@ -10,6 +11,7 @@ let childKey = -1;
 let count = 0;
 let childrenCount = 0;
 let folderName = "";
+let firstLoad = true;
 
 function LeftSideBar() {
     const [modalAddFolder, setModalAddFolder] = useState(false);
@@ -20,12 +22,11 @@ function LeftSideBar() {
     const data = useContext(ManagerContext);
 
     const {
-        token: { colorBgContainer, borderRadiusLG },
+        token: { colorBgContainer },
     } = theme.useToken();
-
-
-
+    
     return (
+        
         <Layout.Sider
             collapsible="true"
             collapsedWidth={115}
@@ -75,11 +76,17 @@ function LeftSideBar() {
                                     label: "My Publications",
                                     key: count + "publications",
                                     onClick: () => {
+                                        if (firstLoad){
+                                            citationData.forEach(element => {
+                                                leftSidebarItems[0].data.push(element);
+                                            });
+                                            firstLoad = false;
+                                        }
                                         activeKey = keyVal;
                                         childKey = keyVal + "publications";
                                         let index = leftSidebarItems.findIndex((data) => {
                                             return data.key == activeKey;
-                                        })                                           
+                                        })
                                         let temp = leftSidebarItems[index].data.filter((data) => {
                                             return data.parentKey == childKey;
                                         })
@@ -94,7 +101,7 @@ function LeftSideBar() {
                                         childKey = keyVal + "duplicates";
                                         let index = leftSidebarItems.findIndex((data) => {
                                             return data.key == activeKey;
-                                        })   
+                                        })
                                         let temp = leftSidebarItems[index].data.filter((data) => {
                                             return data.parentKey == childKey;
                                         })
@@ -109,7 +116,7 @@ function LeftSideBar() {
                                         childKey = keyVal + "unfiled";
                                         let index = leftSidebarItems.findIndex((data) => {
                                             return data.key == activeKey;
-                                        })                                          
+                                        })
                                         let temp = leftSidebarItems[index].data.filter((data) => {
                                             return data.parentKey == childKey;
                                         })
@@ -125,7 +132,7 @@ function LeftSideBar() {
                                         childKey = keyVal + "trash";
                                         let index = leftSidebarItems.findIndex((data) => {
                                             return data.key == activeKey;
-                                        })   
+                                        })
                                         console.log(leftSidebarItems);
                                         console.log(activeKey);
                                         let temp = leftSidebarItems[index].data.filter((data) => {
@@ -137,13 +144,13 @@ function LeftSideBar() {
                                 {
                                     label: "Delete Folder",
                                     key: count + "delete",
-                                    icon: <CloseOutlined/>,
+                                    icon: <CloseOutlined />,
                                     onClick: () => {
                                         activeKey = keyVal;
                                         childKey = -1;
                                         let index = leftSidebarItems.findIndex((data) => {
                                             return data.key == activeKey;
-                                        })                                      
+                                        })
                                         setModalDeleteFolder(true);
                                         let temp = leftSidebarItems[index].data.filter((data) => {
                                             return data.parentKey == childKey;
@@ -212,7 +219,7 @@ function LeftSideBar() {
                                 childKey = keyChild;
                                 let index = leftSidebarItems.findIndex((data) => {
                                     return data.key == activeKey;
-                                })   
+                                })
                                 let temp = leftSidebarItems[index].data.filter((data) => {
                                     return data.parentKey == childKey;
                                 })
@@ -252,12 +259,12 @@ function LeftSideBar() {
                 onCancel={() => {
                     setModalDeleteFolder(false);
                 }}
-                onOk={() =>{
+                onOk={() => {
                     let removeIndex = leftSidebarItems.findIndex((data) => {
                         return data.key == activeKey;
                     })
                     console.log(leftSidebarItems);
-                    leftSidebarItems.splice(removeIndex,1);
+                    leftSidebarItems.splice(removeIndex, 1);
                     let temp = leftSidebarItems.slice();
                     setModalDeleteFolder(false);
                     data.setLeftNavBar(temp);
@@ -283,8 +290,14 @@ function LeftSideBar() {
 export function getActiveFolderKey() {
     return activeKey;
 }
+export function setActiveFolderKey(val) {
+    activeKey = val;
+}
 export function getActiveChildFolderKey() {
     return childKey;
+}
+export function setActiveChildFolderKey(val) {
+    childKey = val;
 }
 export function getLeftSideBar() {
     return leftSidebarItems;
