@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { DeleteOutlined, PlusOutlined, CloseOutlined, DownOutlined, MinusCircleOutlined, CloseOutlined } from '@ant-design/icons';
-import { Select, Tabs, Layout, Menu, theme, Table, Card, Button, Tooltip, Tag, Row, Col , Input} from 'antd';
+import { DeleteOutlined, PlusOutlined, CloseOutlined, DownOutlined, MinusCircleOutlined } from '@ant-design/icons';
+import { Select, Tabs, Layout, Menu, theme, Table, Card, Button, Tooltip, Tag, Row, Col, Input, Form, Modal } from 'antd';
 import './app.css'; // Import CSS file
 import InfoForm from './components/infoForm';
 import citationData from './data/citations';
@@ -16,23 +16,6 @@ const { Header, Content, Sider } = Layout;
 let articleCount = 0;
 let sourceKey = -1;
 
-const formItemLayout = {
-  labelCol: {
-    xs: { span: 24 },
-    sm: { span: 4 },
-  },
-  wrapperCol: {
-    xs: { span: 24 },
-    sm: { span: 20 },
-  },
-};
-
-const formItemLayoutWithOutLabel = {
-  wrapperCol: {
-    xs: { span: 24, offset: 0 },
-    sm: { span: 20, offset: 4 },
-  },
-};
 const { TextArea } = Input; // Destructure TextArea from Input
 
 const navBarItems = [
@@ -42,79 +25,7 @@ const navBarItems = [
   },
 ];
 
-const rightSidebarItems = [
-  {
-    key: 'info',
-    label: 'Info',
-    render: (sourceData) => <div>{sourceData.description}</div>,
-  },
-  {
-    key: 'notes',
-    label: 'Notes',
-    render: (selectedSource) => {
-      return selectedSource ? (
-        <Card title={
-          <span>
-            <SnippetsTwoTone twoToneColor="#FDDA0D" style={{ marginRight: 8, fontSize: '20px' }} />
-            Notes
-          </span>
-        }
-        >
-          {selectedSource.notes.map((note, index) => (
-            <Card key={index} style={{ marginBottom: 16 }}>
-              <p>{note}</p>
-            </Card>
-          ))}
-
-          <Tooltip title="Add note">
-            <Button type="primary" shape="circle" icon={<PlusOutlined />} style={{ backgroundColor: '#34b233' }} />
-          </Tooltip>
-
-
-        </Card>
-      ) : (
-        <div></div> // Blank tab pane if no source is selected
-      );
-    }
-  },
-  {
-    key: 'tags',
-    label: 'Tags',
-    render: (selectedSource) => (
-      <div>
-        {selectedSource.tags.map((tag, index) => (
-          <Tag color="blue" key={index}>{tag}</Tag>
-        ))}
-
-        <Tooltip title="Add tag">
-          <Button type="primary" shape="circle" icon={<PlusOutlined />} style={{ backgroundColor: '#34b233', fontSize: '10px', padding: '4px' }} />
-        </Tooltip>
-      </div>
-    ),
-  },
-  {
-    key: 'related',
-    label: 'Related',
-    render: (selectedSource) => {
-      return selectedSource ? (
-        <Card title="Recommended Articles">
-          {selectedSource.recommendations.map((recommendation, index) => (
-            <Card key={index} style={{ marginBottom: 16 }}>
-              <p>Title: {recommendation.title}</p>
-              <p>Author: {recommendation.author}</p>
-              <a href={recommendation.link} target="_blank" rel="noopener noreferrer">Link To Article</a>
-            </Card>
-          ))}
-        </Card>
-      ) : (
-        <div></div> // Blank tab pane if no source is selected
-      );
-    }
-  },
-];
-
 const sourceColumns = [
-const tableColumns = [
   {
     title: '',
     dataIndex: 'notes',
@@ -144,6 +55,9 @@ const tableColumns = [
           break;
         case 'Web Page':
           itemTypeText = 'Web Page';
+          break;
+        case 'Newspaper Article':
+          itemTypeText = 'Newspaper Article';
           break;
         default:
           itemTypeText = 'N/A';
@@ -193,7 +107,7 @@ const App = () => {
   }
 
   const checkSubFolderDisabled = function () {
-    if (getActiveChildFolderKey() == -1 || getActiveChildFolderKey() == getActiveFolderKey()+"addFolder" || getActiveChildFolderKey() == getActiveFolderKey()+"publications" || getActiveChildFolderKey() == getActiveFolderKey()+"duplicates" || getActiveChildFolderKey() == getActiveFolderKey()+"unfiled" || getActiveChildFolderKey() == getActiveFolderKey()+"trash" || getActiveChildFolderKey() == getActiveFolderKey()+"delete") {
+    if (getActiveChildFolderKey() == -1 || getActiveChildFolderKey() == getActiveFolderKey() + "addFolder" || getActiveChildFolderKey() == getActiveFolderKey() + "publications" || getActiveChildFolderKey() == getActiveFolderKey() + "duplicates" || getActiveChildFolderKey() == getActiveFolderKey() + "unfiled" || getActiveChildFolderKey() == getActiveFolderKey() + "trash" || getActiveChildFolderKey() == getActiveFolderKey() + "delete") {
       return true;
     }
     return false;
@@ -216,7 +130,7 @@ const App = () => {
 
   const getCondensedAuthors = function () {
     let temp = fileForm.getFieldsValue("authorNames").authorNames;
-    if (temp != undefined && temp.length != 0) {
+    if (temp != undefined && temp.length != 0 && temp[0].lastName != "") {
       return temp[0].lastName + " et al.";
     }
     else {
@@ -224,13 +138,12 @@ const App = () => {
     }
   }
 
-const App = () => {
   const [sourceData, setSourceData] = useState(citationData);
 
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
-  
+
   const [showNoteInput, setShowNoteInput] = useState(false);
   const [newNote, setNewNote] = useState("");
   const [showTagInput, setShowTagInput] = useState(false);
@@ -256,12 +169,23 @@ const App = () => {
       // Don't add empty notes
       return;
     }
-  
+
     // Add the new note to the selected source
     const updatedSelectedSource = {
       ...selectedSource,
       notes: [...selectedSource.notes, newNote]
     };
+
+    let index = getLeftSideBar().findIndex((data) => {
+      return data.key == getActiveFolderKey();
+    })
+    let temp = getLeftSideBar()[index].data.findIndex((data) => {
+      return data.key == selectedSource.key;
+    })
+
+    getLeftSideBar()[index].data[temp].notes.push(newNote);
+    console.log(getLeftSideBar())
+    getSourceData()
     
     // Update the selected source with the new note
     setSelectedSource(updatedSelectedSource);
@@ -282,31 +206,42 @@ const App = () => {
   const handleNewTagChange = (e) => {
     setNewTag(e.target.value);
   };
-  
+
   const addNewTag = () => {
     // Perform any validation if needed
     if (newTag.trim() === "") {
       // Don't add empty tags
       return;
     }
-  
+
     // Add the new tag to the selected source
     const updatedSelectedSource = {
       ...selectedSource,
       tags: [...selectedSource.tags, newTag]
     };
-  
+
+    let index = getLeftSideBar().findIndex((data) => {
+      return data.key == getActiveFolderKey();
+    })
+    let temp = getLeftSideBar()[index].data.findIndex((data) => {
+      return data.key == selectedSource.key;
+    })
+
+    getLeftSideBar()[index].data[temp].tags.push(newTag);
+    console.log(getLeftSideBar())
+    getSourceData()
+
     // Update the selected source with the new tag
     setSelectedSource(updatedSelectedSource);
     // Clear the new tag input
     setNewTag("");
   };
-  
+
   const handleTagDoneButtonClick = () => {
     addNewTag();
     toggleTagInput(); // Hide the tag input after adding the tag
   };
-  
+
   const toggleTagInput = () => {
     setShowTagInput(!showTagInput);
     setNewTag(""); // Clear the input field when toggling
@@ -318,7 +253,7 @@ const App = () => {
       label: 'Info',
       render: (selectedSource) => (
         selectedSource ? (
-          <InfoForm selectedSource={selectedSource}/>
+          <InfoForm selectedSource={selectedSource} />
         ) : (
           <div>No source selected</div>
         )
@@ -336,7 +271,7 @@ const App = () => {
                 Notes
               </span>
             }
-            >
+          >
             {selectedSource.notes.map((note, index) => (
               <Card key={index} style={{ marginBottom: 16 }}>
                 <p>{note}</p>
@@ -514,17 +449,27 @@ const App = () => {
                 let index = getLeftSideBar().findIndex((data) => {
                   return data.key == getActiveFolderKey();
                 })
+                let authors = fileForm.getFieldsValue("authorNames").authorNames;
+                if (authors == undefined) {
+                  authors = [{
+                    firstName: "",
+                    lastName: ""
+                  }]
+                }
                 getLeftSideBar()[index].data.unshift({
                   key: articleCount,
                   parentKey: getActiveChildFolderKey(),
                   title: fileForm.getFieldValue("fileName"),
-                  authors: fileForm.getFieldsValue("authorNames").authorNames,
+                  authors: authors,
                   condensedAuthors: getCondensedAuthors(),
                   description: 'N/A',
                   notes: [],
                   recommendations: [], // No recommendations for this item
                   itemType: fileForm.getFieldValue("itemType"),
-                  tags: []
+                  tags: [],
+                  published: "",
+                  abstract: "",
+                  url: "",
                 });
                 articleCount++;
                 getSourceData();
@@ -546,6 +491,7 @@ const App = () => {
                     { value: '', label: '' },
                     { value: 'Web Page', label: 'Web Page' },
                     { value: 'Book', label: 'Book' },
+                    { value: 'Newspaper Article', label: 'Newspaper Article' },
                     { value: 'Journal Article', label: 'Journal Article' },
                   ]}
                 />
@@ -618,7 +564,7 @@ const App = () => {
           >
             <ManagerContext.Provider value={{ dataSource, setDataSource, checkDisabled }}>
               <Table
-                columns={tableColumns}
+                columns={sourceColumns}
                 expandable={{
                   expandedRowRender: (record) => (
                     <p
@@ -632,96 +578,98 @@ const App = () => {
                   rowExpandable: (record) => record.title !== 'Not Expandable',
                 }}
                 dataSource={dataSource}
-                rowClassName={(record, index) => ((record.title.length && record.authors.length) ? "complete" : "incomplete")}
-              pagination={false}
+                rowClassName={(record, index) => (record.title != undefined && record.authors != undefined && ((record.title.length && record.authors.length)) ? "complete" : "incomplete")}
+                pagination={false}
                 onRow={(record, rowIndex) => ({
                   onClick: () => {
                     onSourceRowClick(record);
-                    console.log(record.title.length);
-                }
+                  }
                 })}
               />
-              <br/>
+              <br />
               <Row>
-              <Col span={6} />
-              <Col span={12}>
-              <Button
-              icon={<CloseOutlined/>}
-              style={{width: '100%'}}
-              danger
-              disabled={checkSubFolderDisabled()}
-              onClick={() =>{
-                setModalDeleteSubFolder(true);
-              }}
-              >Delete Sub-Folder</Button>
-              </Col>
-              <Col span={6} />
+                <Col span={6} />
+                <Col span={12}>
+                  <Button
+                    icon={<CloseOutlined />}
+                    style={{ width: '100%' }}
+                    danger
+                    disabled={checkSubFolderDisabled()}
+                    onClick={() => {
+                      setModalDeleteSubFolder(true);
+                    }}
+                  >Delete Sub-Folder</Button>
+                </Col>
+                <Col span={6} />
               </Row>
             </ManagerContext.Provider>
           </Content>
           <Modal
-                title="Confirm Deletion of Sub-Folder"
-                centered="true"
-                open={modalDeleteSubFolder}
-                onCancel={() => {
-                    setModalDeleteSubFolder(false)
-                }}
-                onOk={() => {
-                    let parentIndex = getLeftSideBar().findIndex((data) => {
-                        return data.key == getActiveFolderKey();
-                    });
-                    while (getLeftSideBar()[parentIndex].data.indexOf(getActiveChildFolderKey()) != -1){
-                      let index = getLeftSideBar()[parentIndex].data.indexOf(getActiveChildFolderKey())
-                      getLeftSideBar()[parentIndex].data.splice(index,1);
-                    }
-                    console.log(getLeftSideBar())
-                    console.log(getActiveChildFolderKey())
-                    let subFolderIndex = getLeftSideBar()[parentIndex].children.findIndex((folders) => {
-                        return folders.key == getActiveChildFolderKey();
-                    });
-                    console.log(subFolderIndex)
+            title="Confirm Deletion of Sub-Folder"
+            centered="true"
+            open={modalDeleteSubFolder}
+            onCancel={() => {
+              setModalDeleteSubFolder(false)
+            }}
+            onOk={() => {
+              let parentIndex = getLeftSideBar().findIndex((data) => {
+                return data.key == getActiveFolderKey();
+              });
+              while (getLeftSideBar()[parentIndex].data.indexOf(getActiveChildFolderKey()) != -1) {
+                let index = getLeftSideBar()[parentIndex].data.indexOf(getActiveChildFolderKey())
+                getLeftSideBar()[parentIndex].data.splice(index, 1);
+              }
+              console.log(getLeftSideBar())
+              console.log(getActiveChildFolderKey())
+              let subFolderIndex = getLeftSideBar()[parentIndex].children.findIndex((folders) => {
+                return folders.key == getActiveChildFolderKey();
+              });
+              console.log(subFolderIndex)
 
-                    getLeftSideBar()[parentIndex].children.splice(subFolderIndex, 1);
-                    getSourceData();
-                    let temp = getLeftSideBar().slice();
-                    setLeftNavBar(temp);
-                    setModalDeleteSubFolder(false);
-                }}
-            >
-            </Modal>
+              getLeftSideBar()[parentIndex].children.splice(subFolderIndex, 1);
+              getSourceData();
+              let temp = getLeftSideBar().slice();
+              setLeftNavBar(temp);
+              setModalDeleteSubFolder(false);
+            }}
+          >
+          </Modal>
         </Layout>
-
-        <Sider
-          width={400}
-          style={{
-            background: colorBgContainer,
-            paddingLeft: 12
-          }}
-        >
-          {!selectedSource && (
-            <Card title="Notes">
-              {dataSource.map(source => (
-                source.notes.length > 0 && (
-                  <div key={source.key}>
-                    <SnippetsTwoTone twoToneColor="#FDDA0D" style={{ fontSize: '20px' }} />
-                    <h3>{source.title}</h3>
-                    {source.notes.map((note, index) => (
-                      <Card key={index} style={{ marginBottom: 16 }}>
-                        <p>{note}</p>
-                      </Card>
-                    ))}
-                  </div>
-                )
-              ))}
-            </Card>
-          )}
-          {selectedSource && (
-            <Tabs defaultActiveKey="1" items={rightSidebarItems.map(item => ({
-              ...item,
-              children: item.render(selectedSource, newNote, handleNewNoteChange, addNewNote) // Pass newNote and its functions
-            }))} onChange={onRightSidebarChange} />
+        <ManagerContext.Provider value={{ dataSource, setDataSource }}>
+          <Sider
+            width={400}
+            style={{
+              background: colorBgContainer,
+              paddingLeft: 12
+            }}
+          >
+            {!selectedSource && (
+              <Card title="Notes">
+                {dataSource.map(source => (
+                  source.notes.length > 0 && (
+                    <div key={source.key}>
+                      <SnippetsTwoTone twoToneColor="#FDDA0D" style={{ fontSize: '20px' }} />
+                      <h3>{source.title}</h3>
+                      {source.notes.map((note, index) => (
+                        <Card key={index} style={{ marginBottom: 16 }}>
+                          <p>{note}</p>
+                        </Card>
+                      ))}
+                    </div>
+                  )
+                ))}
+              </Card>
+            )}
+            {selectedSource && (
+              <Tabs defaultActiveKey="1" items={rightSidebarItems.map(item => ({
+                ...item,
+                children: item.render(selectedSource, newNote, handleNewNoteChange, addNewNote) // Pass newNote and its functions
+              }))}
+                onChange={onRightSidebarChange}
+              />
+            )}
           </Sider>
-        )}
+        </ManagerContext.Provider>
       </Layout>
     </Layout >
   );
