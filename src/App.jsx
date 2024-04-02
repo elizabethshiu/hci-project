@@ -1,20 +1,19 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { DeleteOutlined, PlusOutlined, CloseOutlined, DownOutlined, MinusCircleOutlined } from '@ant-design/icons';
+import React, { useState, useEffect } from 'react';
+import { PlusOutlined, CloseOutlined, MinusCircleOutlined } from '@ant-design/icons';
 import { Select, Tabs, Layout, Menu, theme, Table, Card, Button, Tooltip, Tag, Row, Col, Input, Form, Modal } from 'antd';
 
 import './app.css'; // Import CSS file
 import InfoForm from './components/infoForm';
-import citationData from './data/citations';
 import {
   SnippetsTwoTone
 } from '@ant-design/icons';
-import LeftSideBar, { getActiveFolderKey, getActiveChildFolderKey, getLeftSideBar } from './LeftSideBar';
+import LeftSideBar, { getActiveFolderKey, getActiveChildFolderKey, getLeftSideBar, setActiveChildFolderKey } from './LeftSideBar';
 import DeleteSource from './DeleteSource'
 
 
 const { Header, Content, Sider } = Layout;
 
-let articleCount = 0;
+let articleCount = 6;
 let sourceKey = -1;
 
 const { TextArea } = Input; // Destructure TextArea from Input
@@ -98,7 +97,36 @@ const App = () => {
   const [modalDeleteSubFolder, setModalDeleteSubFolder] = useState(false);
   const [leftNavBar, setLeftNavBar] = useState(getLeftSideBar());
   const [fileForm] = Form.useForm();
+  
+  const [searchTerm, setSearchTerm] = useState('');
+  const [showNoteInput, setShowNoteInput] = useState(false);
+  const [newNote, setNewNote] = useState("");
+  const [showTagInput, setShowTagInput] = useState(false);
+  const [newTag, setNewTag] = useState("");
+  const [selectedSource, setSelectedSource] = useState(null);
 
+  const {
+    token: { colorBgContainer, borderRadiusLG },
+  } = theme.useToken();
+
+  useEffect(() => {
+    const handleOutsideClick = (event) => {
+      const isClickInsideTable = event.target.closest('.ant-table');
+      const isClickInsideTabs = event.target.closest('.ant-tabs');
+      const isClickInsideDropDown = event.target.closest('.ant-select-dropdown');
+      const isClickInsidePickerDropDown = event.target.closest('.ant-picker-dropdown');
+      const isClickInsideBtn = event.target.closest('.ant-btn');
+      if (!isClickInsideTable && !isClickInsideTabs && !isClickInsideDropDown && !isClickInsidePickerDropDown & !isClickInsideBtn) {
+        setSelectedSource(null); // Reset selected source when clicking outside the table
+      }
+    };
+
+    document.addEventListener('click', handleOutsideClick);
+
+    return () => {
+      document.removeEventListener('click', handleOutsideClick);
+    };
+  }, []);
 
   const checkDisabled = function () {
     if (getActiveChildFolderKey() == -1) {
@@ -108,6 +136,7 @@ const App = () => {
   }
 
   const checkSubFolderDisabled = function () {
+    console.log(selectedSource);
     if (getActiveChildFolderKey() == -1 || getActiveChildFolderKey() == getActiveFolderKey() + "addFolder" || getActiveChildFolderKey() == getActiveFolderKey() + "publications" || getActiveChildFolderKey() == getActiveFolderKey() + "duplicates" || getActiveChildFolderKey() == getActiveFolderKey() + "unfiled" || getActiveChildFolderKey() == getActiveFolderKey() + "trash" || getActiveChildFolderKey() == getActiveFolderKey() + "delete") {
       return true;
     }
@@ -126,37 +155,33 @@ const App = () => {
         return data.parentKey == getActiveChildFolderKey();
       })
       setDataSource(temp);
+      console.log(selectedSource);
     }
   }
 
   const getCondensedAuthors = function () {
     let temp = fileForm.getFieldsValue("authorNames").authorNames;
-    if (temp != undefined && temp.length != 0 && temp[0].lastName != "") {
+
+    if (temp != undefined) {
+      for (let i = 0; i < temp.length; i++) {
+        if (temp[i] == undefined) {
+          temp[i] = { firstName: "", lastName: "" };
+        }
+      }
+    }
+    if (temp != undefined && temp.length != 0 && temp[0].lastName != "" && temp.length == 1) {
+      return temp[0].lastName;
+    }
+    else if (temp != undefined && temp.length != 0 && temp[0].lastName != "" && temp[1].lastName != "" && temp.length == 2) {
+      return temp[0].lastName + " & " + temp[1].lastName;
+    }
+    else if (temp != undefined && temp.length != 0 && temp[0].lastName != "" && temp[1].lastName != "" && temp[2].lastName != "" && temp.length >= 3) {
       return temp[0].lastName + " et al.";
     }
     else {
       return 'N/A';
     }
   }
-
-  const [sourceData, setSourceData] = useState(citationData);
-  const [searchTerm, setSearchTerm] = useState('');
-
-  const [showNoteInput, setShowNoteInput] = useState(false);
-  const [newNote, setNewNote] = useState("");
-  const [showTagInput, setShowTagInput] = useState(false);
-  const [newTag, setNewTag] = useState("");
-  const [selectedSource, setSelectedSource] = useState(null);
-
-  useEffect(() => {
-    setSourceData(citationData);
-  }, [citationData])
-
-  const {
-    token: { colorBgContainer, borderRadiusLG },
-  } = theme.useToken();
-  
-  
 
   const onSourceRowClick = (record) => {
     setSelectedSource(record);
@@ -165,6 +190,10 @@ const App = () => {
 
   const onRightSidebarChange = (key) => {
     console.log(key);
+  };
+
+  const onRightSidebarCloseButton = () => {
+    setSelectedSource(null)
   };
 
   const handleNewNoteChange = (e) => {
@@ -194,7 +223,7 @@ const App = () => {
     getLeftSideBar()[index].data[temp].notes.push(newNote);
     console.log(getLeftSideBar())
     getSourceData()
-    
+
     // Update the selected source with the new note
     setSelectedSource(updatedSelectedSource);
     // Clear the new note input
@@ -398,11 +427,11 @@ const App = () => {
     },
   ];
 
-  const filteredData = sourceData.filter((item) =>
-  Object.values(item).some((value) =>
-    value && typeof value === "string" && value.toLowerCase().includes(searchTerm.toLowerCase())
-  )
-);
+  const filteredData = dataSource.filter((item) =>
+    Object.values(item).some((value) =>
+      value && typeof value === "string" && value.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
 
   return (
     <Layout>
@@ -432,7 +461,7 @@ const App = () => {
       </Header>
 
       <Layout>
-        <ManagerContext.Provider value={{ dataSource, setDataSource, checkDisabled, leftNavBar, setLeftNavBar }}>
+        <ManagerContext.Provider value={{ dataSource, setDataSource, checkDisabled, leftNavBar, setLeftNavBar, setSelectedSource }}>
           <LeftSideBar>
           </LeftSideBar>
         </ManagerContext.Provider>
@@ -534,6 +563,12 @@ const App = () => {
                           noStyle
                           name={[field.name, "firstName"]}
                           key={[field.key, "fname"]}
+                          rules={[
+                            {
+                              required: true,
+                              message: "Please Input an Author's First Name or Remove the Field!",
+                            },
+                          ]}
                         >
                           <Input placeholder="Author First Name" style={{ width: '45%' }} />
                         </Form.Item>
@@ -542,6 +577,12 @@ const App = () => {
                           noStyle
                           name={[field.name, "lastName"]}
                           key={[field.key, "lName"]}
+                          rules={[
+                            {
+                              required: true,
+                              message: "Please Input an Author's Last Name or Remove the Field!",
+                            },
+                          ]}
                         >
                           <Input placeholder="Author Last Name" style={{ width: '45%' }} />
                         </Form.Item>
@@ -583,7 +624,7 @@ const App = () => {
               borderRadius: borderRadiusLG,
             }}
           >
-            <ManagerContext.Provider value={{ dataSource, setDataSource, checkDisabled }}>
+            <ManagerContext.Provider value={{ dataSource, setDataSource, checkDisabled, setSelectedSource }}>
               <Table
                 columns={sourceColumns}
                 expandable={{
@@ -598,8 +639,8 @@ const App = () => {
                   ),
                   rowExpandable: (record) => record.title !== 'Not Expandable',
                 }}
-                dataSource={dataSource}
-                rowClassName={(record, index) => (record.title != undefined && record.authors != undefined && ((record.title.length && record.authors.length)) ? "complete" : "incomplete")}
+                dataSource={filteredData}
+                rowClassName={(record, index) => (record.title != undefined && record.authors != undefined && ((record.title.length && record.authors.length && record.authors[0].lastName != "")) ? "complete" : "incomplete")}
                 pagination={false}
                 onRow={(record, rowIndex) => ({
                   onClick: () => {
@@ -633,28 +674,39 @@ const App = () => {
               setModalDeleteSubFolder(false)
             }}
             onOk={() => {
+              //get active folder key
               let parentIndex = getLeftSideBar().findIndex((data) => {
                 return data.key == getActiveFolderKey();
               });
-              while (getLeftSideBar()[parentIndex].data.indexOf(getActiveChildFolderKey()) != -1) {
-                let index = getLeftSideBar()[parentIndex].data.indexOf(getActiveChildFolderKey())
+              //get index of data matching child key
+              let index = getLeftSideBar()[parentIndex].data.findIndex( 
+                (temp) => temp.parentKey === getActiveChildFolderKey() 
+              ); 
+              //remove data that matches child folder key
+              while (index != -1) {
                 getLeftSideBar()[parentIndex].data.splice(index, 1);
+                index = getLeftSideBar()[parentIndex].data.findIndex( 
+                  (temp) => temp.parentKey === getActiveChildFolderKey() 
+                ); 
               }
               let subFolderIndex = getLeftSideBar()[parentIndex].children.findIndex((folders) => {
                 return folders.key == getActiveChildFolderKey();
               });
-              console.log(subFolderIndex)
-
+              //remove subfolder
               getLeftSideBar()[parentIndex].children.splice(subFolderIndex, 1);
-              getSourceData();
+
+              //update render values
               let temp = getLeftSideBar().slice();
-              setLeftNavBar(temp);
               setModalDeleteSubFolder(false);
+              setSelectedSource(null);
+              getSourceData();
+              setActiveChildFolderKey(-1);
+              setLeftNavBar(temp);
             }}
           >
           </Modal>
         </Layout>
-        <ManagerContext.Provider value={{ dataSource, setDataSource }}>
+        <ManagerContext.Provider value={{ dataSource, setDataSource, setSelectedSource }}>
           <Sider
             width={400}
             style={{
@@ -680,13 +732,21 @@ const App = () => {
               </Card>
             )}
             {selectedSource && (
-              <Tabs defaultActiveKey="1" items={rightSidebarItems.map(item => ({
-                ...item,
-                children: item.render(selectedSource, newNote, handleNewNoteChange, addNewNote) // Pass newNote and its functions
-              }))}
-                onChange={onRightSidebarChange}
-              />
+              <>
+                <Tabs defaultActiveKey="1" items={rightSidebarItems.map(item => ({
+                  ...item,
+                  children: item.render(selectedSource, newNote, handleNewNoteChange, addNewNote) // Pass newNote and its functions
+                }))}
+                  onChange={onRightSidebarChange} />
+                  <br/>
+                <Button
+                onClick={onRightSidebarCloseButton}
+                >
+                  Close Source
+                  </Button>
+              </>
             )}
+            
           </Sider>
         </ManagerContext.Provider>
       </Layout>
