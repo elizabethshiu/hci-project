@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { DeleteOutlined, PlusOutlined, CloseOutlined, DownOutlined, MinusCircleOutlined } from '@ant-design/icons';
 import { Select, Tabs, Layout, Menu, theme, Table, Card, Button, Tooltip, Tag, Row, Col, Input, Form, Modal } from 'antd';
+
 import './app.css'; // Import CSS file
 import InfoForm from './components/infoForm';
 import citationData from './data/citations';
@@ -139,6 +140,7 @@ const App = () => {
   }
 
   const [sourceData, setSourceData] = useState(citationData);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const [showNoteInput, setShowNoteInput] = useState(false);
   const [newNote, setNewNote] = useState("");
@@ -396,6 +398,12 @@ const App = () => {
     },
   ];
 
+  const filteredData = sourceData.filter((item) =>
+  Object.values(item).some((value) =>
+    value && typeof value === "string" && value.toLowerCase().includes(searchTerm.toLowerCase())
+  )
+);
+
   return (
     <Layout>
       <Header
@@ -414,6 +422,13 @@ const App = () => {
             minWidth: 0,
           }}
         />
+        <Input
+          placeholder="Search..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          style={{ marginLeft: 'auto', marginRight: 10, width: 200 }}
+        />
+        <Button onClick={() => setSearchTerm('')}><CloseOutlined /></Button>
       </Header>
 
       <Layout>
