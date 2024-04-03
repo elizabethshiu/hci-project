@@ -116,7 +116,8 @@ const App = () => {
       const isClickInsideDropDown = event.target.closest('.ant-select-dropdown');
       const isClickInsidePickerDropDown = event.target.closest('.ant-picker-dropdown');
       const isClickInsideBtn = event.target.closest('.ant-btn-circle');
-      if (!isClickInsideTable && !isClickInsideTabs && !isClickInsideDropDown && !isClickInsidePickerDropDown & !isClickInsideBtn) {
+      const isClickInsideBtnDone = event.target.closest('.ant-btn-round');
+      if (!isClickInsideTable && !isClickInsideTabs && !isClickInsideDropDown && !isClickInsidePickerDropDown & !isClickInsideBtn & !isClickInsideBtnDone) {
         setSelectedSource(null); // Reset selected source when clicking outside the table
       }
     };
@@ -190,10 +191,6 @@ const App = () => {
 
   const onRightSidebarChange = (key) => {
     console.log(key);
-  };
-
-  const onRightSidebarCloseButton = () => {
-    setSelectedSource(null)
   };
 
   const handleNewNoteChange = (e) => {
@@ -334,7 +331,7 @@ const App = () => {
                 </Tooltip>
                 <div style={{ float: 'right' }}>
                   <Tooltip title="Done">
-                    <Button type="primary" onClick={handleDoneButtonClick}>Done</Button>
+                    <Button type="primary" shape='round' onClick={handleDoneButtonClick}>Done</Button>
                   </Tooltip>
                 </div>
               </div>
@@ -384,7 +381,7 @@ const App = () => {
                 </Tooltip>
                 <div style={{ float: 'right' }}>
                   <Tooltip title="Done">
-                    <Button type="primary" onClick={handleTagDoneButtonClick}>Done</Button>
+                    <Button type="primary" shape='round' onClick={handleTagDoneButtonClick}>Done</Button>
                   </Tooltip>
                 </div>
               </div>
