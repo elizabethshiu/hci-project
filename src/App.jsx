@@ -115,7 +115,7 @@ const App = () => {
       const isClickInsideTabs = event.target.closest('.ant-tabs');
       const isClickInsideDropDown = event.target.closest('.ant-select-dropdown');
       const isClickInsidePickerDropDown = event.target.closest('.ant-picker-dropdown');
-      const isClickInsideBtn = event.target.closest('.ant-btn');
+      const isClickInsideBtn = event.target.closest('.ant-btn-circle');
       if (!isClickInsideTable && !isClickInsideTabs && !isClickInsideDropDown && !isClickInsidePickerDropDown & !isClickInsideBtn) {
         setSelectedSource(null); // Reset selected source when clicking outside the table
       }
@@ -732,21 +732,12 @@ const App = () => {
               </Card>
             )}
             {selectedSource && (
-              <>
                 <Tabs defaultActiveKey="1" items={rightSidebarItems.map(item => ({
                   ...item,
                   children: item.render(selectedSource, newNote, handleNewNoteChange, addNewNote) // Pass newNote and its functions
                 }))}
                   onChange={onRightSidebarChange} />
-                  <br/>
-                <Button
-                onClick={onRightSidebarCloseButton}
-                >
-                  Close Source
-                  </Button>
-              </>
             )}
-            
           </Sider>
         </ManagerContext.Provider>
       </Layout>
