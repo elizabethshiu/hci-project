@@ -1,22 +1,13 @@
-# React + Vite
+# HCI Zotero Redesign
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Our CS4474 project is a rework of Zotero, a bibliography and research manager. The app allows you to group and add citations for easy management.
 
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+The app is built using React and Vite, and utitlizes the Ant Design component library.
 
 
 To run app:
 ```
-cd hci-project
+#in the main directory
 npm install
 npm run dev
 ```
-
-Using antd:
-- Make sure to add the component in the import statement at the top of the file
-- Copy paste any data structures near the top and the <Element> </Element> into the body
-- After adding a new element save the file and refresh the page
-- If the page is blank double check that you imported the component
