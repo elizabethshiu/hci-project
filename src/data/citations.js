@@ -1,6 +1,7 @@
 const citationData = [
   {
     key: 1,
+    parentKey: "0publications",
     title: 'I.—COMPUTING MACHINERY AND INTELLIGENCE',
     authors: [{ firstName: 'Alan', lastName: 'Turing' }],
     publishDate: '1950-03-05',
@@ -31,6 +32,7 @@ const citationData = [
   },
   {
     key: 2,
+    parentKey: "0publications",
     title: 'Artificial Intelligence: A Modern Approach',
     authors: [{ firstName: 'Peter', lastName: 'Stuart' }, { firstName: 'Peter', lastName: 'Norvig' }],
     publishDate: '2020-10-16',
@@ -55,6 +57,7 @@ const citationData = [
   },
   {
     key: 3,
+    parentKey: "0publications",
     title: 'Foundations of Machine Learning',
     authors: [{ firstName: 'Mehryar', lastName: 'Mohri' }, { firstName: 'Afshin', lastName: 'Rostamizadeh' }, { firstName: 'Ameet', lastName: 'Talwalkar' }],
     publishDate: '2001-07-09',
@@ -79,8 +82,9 @@ const citationData = [
   },
   {
     key: 4,
+    parentKey: "0publications",
     title: 'A New High In Deal Activity To Artificial Intelligence Startups In Q4\'15',
-    authors: [],
+    authors: [{ firstName: '', lastName: '' }],
     publishDate: '',
     condensedAuthors: 'N/A',
     description: 'N/A',
@@ -93,6 +97,7 @@ const citationData = [
   },
   {
     key: 5,
+    parentKey: "0publications",
     title: 'ImageNet Classification with Deep Convolutional Neural Networks',
     authors: [{ firstName: 'Alex', lastName: 'Krizhevsky' }, { firstName: 'Ilya', lastName: 'Sutskever' }, { firstName: 'Geoffrey', lastName: 'Hinton' }],
     publishDate: '2022-03-05',
