@@ -221,6 +221,7 @@ const InfoForm = (selectedSource) => {
                     <Input
                         value={url}
                         onChange={handleUrlChange}
+                        disabled={itemType == 'Book' ? true : false}
                     />
                 </div>
 
