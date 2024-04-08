@@ -7,7 +7,19 @@ The app is built using React and Vite, and utitlizes the Ant Design component li
 
 To run app:
 ```
+Download and install Node.js from https://nodejs.org/en
+
 #in the main directory
 npm install
 npm run dev
+
+In your browser go to http://localhost:5173/
+
+From there add a folder by clicking the add folder button on the left side of the screen
+For demo purposes under the first folder you've added, under My Publications some pre-generated sources will be available for you to view and interact with
+Once you've added a folder you will have the option to add subfolders or utlize the existing ones.
+Inside these subfolders you can add sources by clicking the add source button, delete sources by clicking the delete button attched to the source
+and edit sources by clicking on the desired source and editing its data that appears on the right side of the screen.
+
+Subfolders you create can be deleted as well as the main Folder you created.
 ```
